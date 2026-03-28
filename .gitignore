@@ -26,6 +26,10 @@ user_data/hyperopt_results/
 __pycache__/
 *.pyc
 
+# Archivos con API Keys (Secretos)
+mcp-server-nodejs/src/groq-bridge.ts
+mcp-server-nodejs/dist/groq-bridge.js
+
 # Excluir todo el user_data de forma conservadora
 # Pero permitir las estrategias (que es donde vive la IA)
 user_data/*
