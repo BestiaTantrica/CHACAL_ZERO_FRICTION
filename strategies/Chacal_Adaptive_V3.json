@@ -1,0 +1,42 @@
+{
+  "strategy_name": "Chacal_Adaptive_V3",
+  "params": {
+    "roi": {},
+    "stoploss": {
+      "stoploss": -0.99
+    },
+    "trailing": {
+      "trailing_stop": false,
+      "trailing_stop_positive": null,
+      "trailing_stop_positive_offset": 0.0,
+      "trailing_only_offset_is_reached": false
+    },
+    "max_open_trades": {
+      "max_open_trades": 12
+    },
+    "buy": {
+      "alerta_threshold": 0.395,
+      "btc_threshold_mult": 0.614,
+      "corr_window": 438,
+      "dca_drop_mult": 2.914,
+      "long_risk_guard_factor": 0.625,
+      "max_dca_orders": 4,
+      "pivot_threshold": 0.821,
+      "rebelde_threshold": 0.522,
+      "rsi_buy_max": 82,
+      "rsi_buy_min": 13,
+      "short_score_floor_mult": 0.328,
+      "w_atr": 0.196,
+      "w_corr": 0.239,
+      "w_div": 0.458,
+      "w_ema": 0.264,
+      "w_macro": 0.332,
+      "w_rps": 0.428
+    },
+    "sell": {
+      "stoploss_atr_mult": 0.989
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-03-28 02:26:58.221747+00:00"
+}

@@ -1,0 +1,34 @@
+{
+    "name": "chacal-mcp-server",
+    "version": "0.1.0",
+    "description": "MCP server for Chacal trading strategies",
+    "main": "dist/server.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "ts-node src/server.ts",
+        "dev": "ts-node src/server.ts"
+    },
+    "keywords": [
+        "mcp",
+        "trading",
+        "strategies",
+        "freqtrade"
+    ],
+    "author": "Chacal",
+    "license": "MIT",
+    "dependencies": {
+        "@modelcontextprotocol/sdk": "^1.27.1",
+        "@types/mathjs": "^9.4.1",
+        "@types/node": "^18.0.0",
+        "axios": "^1.13.6",
+        "ccxt": "^4.5.44",
+        "mathjs": "^15.1.1",
+        "ts-node": "^10.9.0",
+        "typescript": "^5.0.0",
+        "yahoo-finance2": "^3.13.2"
+    },
+    "devDependencies": {
+        "ts-node": "^10.9.0",
+        "typescript": "^5.0.0"
+    }
+}

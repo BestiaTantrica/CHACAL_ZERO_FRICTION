@@ -1,0 +1,39 @@
+# CHACAL ZERO FRICTION - GITIGNORE DE SEGURIDAD
+# Evita subir secretos, bases de datos o llaves privadas.
+
+# Llaves y Secretos
+*.pem
+*.key
+*.cert
+*.env
+auth.json
+
+# Bases de Datos (Historial de Trades)
+*.sqlite
+*.sqlite-journal
+user_data/tradesv3*
+
+# Logs y Resultados Temporales
+*.log
+*.txt
+user_data/logs/
+user_data/backtest_results/
+user_data/plot_results/
+user_data/hyperopt_results/
+
+# Docker y Local
+.vscode/
+__pycache__/
+*.pyc
+
+# Excluir todo el user_data de forma conservadora
+# Pero permitir las estrategias (que es donde vive la IA)
+user_data/*
+!user_data/strategies/
+!user_data/strategies/*.py
+!user_data/strategies/*.json
+
+# Documentación de Skills (Nuestra memoria)
+!skills/
+!skills/*.md
+node_modules
