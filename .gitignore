@@ -40,4 +40,14 @@ user_data/*
 # Documentación de Skills (Nuestra memoria)
 !skills/
 !skills/*.md
+
+# Asegurar que nada de user_data de subproyectos se escape
+PROJECT_SNIPER_AWS/user_data/*
+!PROJECT_SNIPER_AWS/user_data/strategies/
+!PROJECT_SNIPER_AWS/user_data/strategies/*.py
+
+CHACAL_VOLUME_HUNTER/user_data/*
+!CHACAL_VOLUME_HUNTER/user_data/strategies/
+!CHACAL_VOLUME_HUNTER/user_data/strategies/*.py
+
 node_modules

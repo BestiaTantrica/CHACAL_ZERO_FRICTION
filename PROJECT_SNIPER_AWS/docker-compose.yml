@@ -1,0 +1,13 @@
+---
+services:
+  freqtrade:
+    image: freqtradeorg/freqtrade:stable
+    container_name: Chacal_Sniper_AWS_Env
+    shm_size: '2gb'
+    volumes:
+      - "./user_data:/freqtrade/user_data"
+    environment:
+      - FREQTRADE_WORKERS=1
+      - PAGER=cat
+    entrypoint: /bin/bash
+    command: ["-c", "trap : TERM INT; tail -f /dev/null & wait"]
