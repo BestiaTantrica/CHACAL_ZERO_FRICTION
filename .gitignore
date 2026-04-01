@@ -29,6 +29,7 @@ __pycache__/
 # Archivos con API Keys (Secretos)
 mcp-server-nodejs/src/groq-bridge.ts
 mcp-server-nodejs/dist/groq-bridge.js
+mcp-server-nodejs/src/groq-bridge.js
 
 # Excluir todo el user_data de forma conservadora
 # Pero permitir las estrategias (que es donde vive la IA)
@@ -41,13 +42,33 @@ user_data/*
 !skills/
 !skills/*.md
 
-# Asegurar que nada de user_data de subproyectos se escape
-PROJECT_SNIPER_AWS/user_data/*
-!PROJECT_SNIPER_AWS/user_data/strategies/
-!PROJECT_SNIPER_AWS/user_data/strategies/*.py
+# Proteccion de Secretos y Carpetas de Compilacion
+mcp-server-nodejs/dist/
+mcp-server-nodejs/node_modules/
+mcp-server-nodejs/.env
+dist/
+node_modules/
+.env
 
-CHACAL_VOLUME_HUNTER/user_data/*
-!CHACAL_VOLUME_HUNTER/user_data/strategies/
-!CHACAL_VOLUME_HUNTER/user_data/strategies/*.py
+# Freqtrade Data (Blindado)
+PROJECT_SNIPER_AWS/user_data/data/
+PROJECT_SNIPER_AWS/user_data/backtest_results/
+PROJECT_SNIPER_AWS/user_data/hyperopt_results/
+PROJECT_SNIPER_AWS/user_data/logs/
+PROJECT_SNIPER_AWS/user_data/notebooks/
+PROJECT_SNIPER_AWS/user_data/plots/
+PROJECT_SNIPER_AWS/user_data/strategies/*.json
+PROJECT_SNIPER_AWS/user_data/config.json
+
+# Freqtrade Data CHACAL_VOLUME_HUNTER
+CHACAL_VOLUME_HUNTER/user_data/configs/*
+CHACAL_VOLUME_HUNTER/user_data/configs/
+CHACAL_VOLUME_HUNTER/user_data/data/
+CHACAL_VOLUME_HUNTER/user_data/backtest_results/
+CHACAL_VOLUME_HUNTER/user_data/hyperopt_results/
+CHACAL_VOLUME_HUNTER/user_data/logs/
+CHACAL_VOLUME_HUNTER/user_data/notebooks/
+CHACAL_VOLUME_HUNTER/user_data/plots/
+CHACAL_VOLUME_HUNTER/user_data/strategies/*.json
 
 node_modules
