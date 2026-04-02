@@ -1,3 +1,12 @@
+# Estado Volume Hunter (2026-04-01)
+- Hyperopt 100 épocas completado: +0.71% (época 90)
+- Backtest: -17.44% (mejoró de -22.73%)
+- Time guard implementado (06-20 UTC)
+- Hyperopt 28 pares en progreso: Jul-Nov 2025, 123 días
+- 28 pares con datos desde Sep 2025, solo BTC/ETH para 2024
+
+---
+
 # Sprint Adaptabilidad de Transiciones (prioridad máxima)
 
 ## Fase A: Validadores de régimen

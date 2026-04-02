@@ -1,0 +1,30 @@
+{
+  "strategy_name": "ChacalVolumeHunter_V1",
+  "params": {
+    "roi": {},
+    "stoploss": {
+      "stoploss": -0.99
+    },
+    "max_open_trades": {
+      "max_open_trades": 8
+    },
+    "buy": {
+      "btc_threshold_mult": 1.536,
+      "dca_drop_mult": 2.511,
+      "rsi_buy_min": 25,
+      "w_atr": 0.351,
+      "w_corr": 0.431
+    },
+    "sell": {
+      "stoploss_atr_mult": 2.478
+    },
+    "trailing": {
+      "trailing_stop": true,
+      "trailing_stop_positive": 0.324,
+      "trailing_stop_positive_offset": 0.377,
+      "trailing_only_offset_is_reached": true
+    }
+  },
+  "ft_stratparam_v": 1,
+  "export_time": "2026-04-02 03:34:45.150503+00:00"
+}
