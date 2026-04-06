@@ -12,8 +12,8 @@ from typing import Optional, Any, Dict
 
 class ChacalVolumeHunter_V1(IStrategy):
     """
-    CHACAL VOLUME HUNTER - PC EDITION (108% PROFIT VERSION)
-    ESTADO: ESTABLE / LISTO PARA LIVE
+    CHACAL VOLUME HUNTER - PC EDITION (SYNCHRONIZED & PROTECTED)
+    ESTADO: MASTER OPTIMIZADA (Drawdown < 11%)
     """
     INTERFACE_VERSION = 3
     can_short = False 
@@ -26,12 +26,19 @@ class ChacalVolumeHunter_V1(IStrategy):
     minimal_roi = {'0': 0.50}
     stoploss = -0.99
     
-    stoploss_atr_mult = DecimalParameter(1.0, 3.0, default=1.514, space='sell', load=True)
-    rsi_buy_min = IntParameter(15, 60, default=31, space='buy', load=True)
+    # --- Parámetros de Inflexión de Mercado (Optimizado Epoch 116) ---
+    macro_rsi_bull = IntParameter(50, 75, default=70, space='buy', load=True) # Punto de cambio a FOMO
+    fomo_rsi_max = IntParameter(65, 85, default=68, space='buy', load=True)   # Techo de entrada FOMO
+    
+    # --- Parámetros Buy (Optimizado Epoch 116) ---
+    btc_threshold_mult = DecimalParameter(0.8, 2.5, default=1.931, space='buy', load=True)
+    rsi_buy_min = IntParameter(15, 60, default=49, space='buy', load=True)
+    w_corr  = DecimalParameter(0.3, 0.6, default=0.483, space='buy', load=True)
+    w_atr   = DecimalParameter(0.1, 0.4, default=0.119, space='buy', load=True)
+
+    # --- Parámetros Sell/Exit ---
     exit_rsi_level = IntParameter(60, 95, default=92, space='sell', load=True)
-    btc_threshold_mult = DecimalParameter(0.8, 2.5, default=0.869, space='buy', load=True)
-    w_corr  = DecimalParameter(0.3, 0.6, default=0.575, space='buy', load=True)
-    w_atr   = DecimalParameter(0.1, 0.4, default=0.308, space='buy', load=True)
+    stoploss_atr_mult = DecimalParameter(1.0, 3.0, default=1.514, space='sell', load=True)
     
     timeframe = '5m'
     inf_timeframe = '1h'
@@ -63,16 +70,14 @@ class ChacalVolumeHunter_V1(IStrategy):
             dataframe = pd.merge(dataframe, btc_1h[['date', 'btc_rsi_1h', 'btc_ema_50_1h', 'btc_delta']], on='date', how='left')
         
         dataframe.fillna({'btc_rsi_1h': 50, 'btc_delta': 0, 'btc_rsi': 50, 'btc_std': 0.002}, inplace=True)
-        # Fallback ultra-seguro para la EMA Macro
         if 'btc_ema_50_1h' not in dataframe.columns:
-             dataframe['btc_ema_50_1h'] = dataframe['close'] * 1.5 # Valor que hace fallar la entrada por defecto
+             dataframe['btc_ema_50_1h'] = dataframe['close'] * 1.5
         
         if 'close_btc' not in dataframe.columns: dataframe['close_btc'] = dataframe['close']
             
         dataframe['atraso'] = dataframe['close_btc'].pct_change(5, fill_method=None) - dataframe['close'].pct_change(5, fill_method=None)
-        dataframe['is_super_bull'] = (dataframe['btc_rsi_1h'] > 60)
         
-        # FILTRO MACRO IMPLACABLE: Solo True si tenemos datos reales y el precio está arriba de la EMA50 1h
+        # FILTRO MACRO IMPLACABLE
         dataframe['is_macro_bull'] = False
         dataframe.loc[(dataframe['btc_ema_50_1h'] > 0) & (dataframe['close_btc'] > dataframe['btc_ema_50_1h']), 'is_macro_bull'] = True
         
@@ -83,16 +88,16 @@ class ChacalVolumeHunter_V1(IStrategy):
         bull_long = (
             dataframe['is_macro_bull'] & 
             (dataframe['btc_delta'] > -0.01) & 
-            (dataframe['atraso'] > (dataframe['btc_std'] * 1.5)) & # Atraso más exigente
-            (dataframe['volume'] > (dataframe['volume_mean'] * 2.0)) & # Spike de Volumen Real
-            (dataframe['rsi'] > dataframe['rsi'].shift(1)) & # RSI con tendencia alcista
-            (~dataframe['is_super_bull'])
+            (dataframe['atraso'] > (dataframe['btc_std'] * self.btc_threshold_mult.value)) & 
+            (dataframe['volume'] > (dataframe['volume_mean'] * 2.0)) & 
+            (dataframe['rsi'] > self.rsi_buy_min.value) &
+            (dataframe['btc_rsi_1h'] <= self.macro_rsi_bull.value) 
         )
         # 2. SUPER BULL FOMO (Permisivo para captar el rally)
         super_bull_long = (
             dataframe['is_macro_bull'] & 
-            (dataframe['is_super_bull']) & 
-            (dataframe['rsi'] < 75) & 
+            (dataframe['btc_rsi_1h'] > self.macro_rsi_bull.value) & 
+            (dataframe['rsi'] < self.fomo_rsi_max.value) & 
             (dataframe['close'] > dataframe['ema_20']) &
             (dataframe['volume'] > dataframe['volume_mean'])
         )
@@ -104,10 +109,6 @@ class ChacalVolumeHunter_V1(IStrategy):
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        # SALIDA POR ROTACIÓN TÉCNICA (Punto Medio Chacal)
-        # Salimos si el precio pierde la EMA 13 (Agotamiento de impulso diario)
-        # IMPORTANTE: Solo activamos esta rotación si ya tenemos un profit razonable (>5%)
-        # o si tocamos el techo de RSI 92 para evitar el churn de comisiones.
         exit_long = (
             (dataframe['rsi'] > self.exit_rsi_level.value)
         )
@@ -120,11 +121,22 @@ class ChacalVolumeHunter_V1(IStrategy):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
 
-        # ROTACIÓN DE CAPITAL: Si ganamos > 5% y el precio pierde la EMA 13, salimos para buscar otra.
+        # ROTACIÓN DE CAPITAL
         if current_profit > 0.05:
             if last_candle['close'] < last_candle['ema_13']:
                 return 'TECHNICAL_ROTATION'
+                
+        # --- ZOMBIE & DUMP KILL SWITCHES ---
+        time_opened_h = (current_time - trade.open_date_utc).total_seconds() / 3600
         
+        # 1. ZOMBIE KILLER: 48h y perdiendo > 5%
+        if time_opened_h > 48.0 and current_profit < -0.05:
+            return 'ZOMBIE_48H_LOSS'
+            
+        # 2. PANIC DUMP AIRBAG (Reducido a -25% apalancado)
+        if current_profit < -0.25:
+            return 'PANIC_DUMP_LOSS'
+
         return None
 
     def leverage(self, pair, current_time, current_rate, proposed_leverage, max_leverage, entry_tag, side, **kwargs) -> float:
