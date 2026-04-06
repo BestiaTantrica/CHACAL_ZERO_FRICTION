@@ -2,9 +2,9 @@
 # flake8: noqa: F401
 # isort: skip_file
 """
-CHACAL SNIPER BEAR44 v4 — SOLO SHORT, FIX PARAMETROS
+CHACAL SNIPER BEAR 1M — EXPERIMENTO TIMEFRAME 1 MINUTO
 =====================================================
-TODOS los params en spaces minimos para evitar KeyError
+Prueba Quirúrgica para cazar el rebote fino.
 """
 
 import numpy as np
@@ -18,7 +18,7 @@ from freqtrade.strategy import DecimalParameter, IStrategy, IntParameter
 from freqtrade.persistence import Trade
 
 
-class ChacalSniper_Bear44(IStrategy):
+class ChacalSniper_Bear_1m(IStrategy):
     INTERFACE_VERSION = 3
     can_short: bool = True
 
@@ -61,7 +61,7 @@ class ChacalSniper_Bear44(IStrategy):
     trailing_only_offset_is_reached = True
 
     stoploss = -0.075
-    timeframe = '5m'
+    timeframe = '1m'
 
     def _sl_for_pair(self, pair: str) -> float:
         return self.bear_stoploss.value

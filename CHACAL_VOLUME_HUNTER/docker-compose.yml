@@ -1,12 +1,14 @@
----
-version: '3'
 services:
   freqtrade_volume_hunter:
     image: freqtradeorg/freqtrade:stable
     container_name: chacal_volume_hunter
     restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       - "./user_data:/freqtrade/user_data"
+      - "../strategies:/freqtrade/user_data/strategies"
     # Port 8081 para no chocar con otros bots en la misma red
     ports:
       - "8081:8081"
@@ -19,6 +21,9 @@ services:
 
   freqtrade_hyperopt_bull:
     image: freqtradeorg/freqtrade:stable
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     volumes:
       - "./user_data:/freqtrade/user_data"
     command: >

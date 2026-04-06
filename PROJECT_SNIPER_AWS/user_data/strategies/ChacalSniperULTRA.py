@@ -1,0 +1,1 @@
+"""CHACAL SNIPER ULTRA 1M""" 

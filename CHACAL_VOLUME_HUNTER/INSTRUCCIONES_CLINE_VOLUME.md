@@ -429,15 +429,21 @@ Los parámetros resultantes deben **copiarse manualmente** al bloque de defaults
 
 ---
 
-### RESULTADOS DE VALIDACIÓN MULTI-MERCADO (2026-04-03) — PARÁMETROS GANADORES
+### RESULTADOS DE VALIDACIÓN MULTI-MERCADO (MAESTRÍA VOLUMEN - ABRIL 2026)
 
-| Periodo | Modo | Profit Bot | Market Change | Drawdown | Observación |
+| Periodo | Escenario | Resultado Profit | Trades | Winrate | Observación |
 |:---|:---|:---|:---|:---|:---|
-| Feb 2024 | Super Bull | **+37.03%** | +34.15% | 9.66% | Mejor trade: BTC +90.77% (RSI exit) |
-| Jul 2025 | Bull Lateral | **+7.88%** | +25.12% | 9.56% | Bot supera al mercado en ratio riesgo/retorno |
-| Ene 2024 | Bajista | **+2.89%** | -7.13% | 9.98% | Bot ganó dinero mientras el mercado caía |
+| **Feb 2024** | **Super Bull** | **+129.67%** | 120 | 93.3% | Equilibrio perfecto de rotación técnica. |
+| **Jul 2025** | **Super Bull 2** | **+139.28%** | 160 | 93.8% | Máxima agresividad controlada. |
+| **May 2024** | **Lateral Bull** | **+73.41%** | 84 | 90.5% | Filtro de volumen spike evitó fakes. |
+| **Ene 2024** | **Oso/Lateral** | **+0.06%** | 56 | 82.1% | **CAPITAL PROTEGIDO.** Filtro Macro BTC salvador. |
+| **Sep 2024** | **Maldad/Dump** | **+62.20%** | 70 | 88.6% | **STABLE.** Drawdown contenido en 8.17%. |
 
-**CONCLUSIÓN:** Bot Todo Terreno validado. Drawdown siempre < 10%, ganancia positiva en 3 regímenes distintos.
+### PILARES DE LA ESTRATEGIA V1.2 (CONSOLIDADA)
+1. **FILTRO MACRO:** BTC > EMA50 (1h) → El bot solo respira si el mercado mayor está sano.
+2. **ROTACIÓN TÉCNICA:** Salida por EMA13 (si Profit > 5%) → Liberación de slots para re-entrada rápida.
+3. **CALIDAD DE VOLUMEN:** Spike > 2.0x Media → Filtro de "ruido" en mercados aburridos.
+4. **TIMEFRAME HÍBRIDO:** 5m para gatillo, 1h para tendencia. Operación 24/7 sin time-guard.
 
 ### PARÁMETROS ACTUALES GRABADOS EN PIEDRA (ChacalVolumeHunter_V1.py)
 
@@ -461,11 +467,15 @@ trailing_stop_positive_offset = 0.391
 
 ---
 
-### NOTAS DE SESIÓN (2026-04-03)
-*   **DCA PURGADO:** Se eliminó por ineficiencia en asimetría de riesgo (perdía más de lo que ganaba). Volvemos a **Stakes Planos**.
-*   **FILTRO ALTS:** La señal `SUPER_BULL_FOMO` ahora exige `risk_guard` + `volume_guard`. Solo Alts acopladas a BTC.
-*   **HYPEROPT RESULT (Epoch 20):** +29.42% Profit en 28 días. Win Rate 20% (compensado por grandes ganadoras vs pequeñas perdedoras).
-*   **PENDIENTE:** Relanzar Hyperopt completo (200 ep) para clavar los márgenes perfectos de entrada/salida.
+### PRÓXIMOS PASOS — PROYECTO SNIPER BEAR (AWS)
+
+1. **MIGRACIÓN MACRO:** Inyectar el filtro `BTC > EMA50 (1h)` en el bot Bear para evitar shortear en medio de una recuperación Bull.
+2. **CONFIRMACIÓN 1M (EL FINO):** Usar el RSI 1m como filtro de entrada y la Micro-EMA 1m como gatillo de salida rápida. 
+3. **PREVENCIÓN DE REBOTE:** En Bear Markets, el 1m es el "aviso de incendio". Si el precio rompe la EMA 1m en contra, el bot Bear sale de inmediato.
+
+### NOTAS SOBRE PRECISIÓN 1M (LIVE)
+* El 1m no para Backtest (pesado/ruido), sino para **ENTRADA DE RAYO.** 
+* Propósito: Obtener un mejor precio promedio (Better Fill) esperando el retroceso de RSI de un minuto.
 
 ---
 

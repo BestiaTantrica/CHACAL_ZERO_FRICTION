@@ -1,62 +1,95 @@
-# Chacal Zero Friction - Arquitectura de Referencia
+# Chacal Zero Friction - Referencia General
 
-## Actualizado: 2026-04-01
-
----
-
-## ARQUITECTURA DUAL (ESTADO ACTUAL)
-
-| Bot | Entorno | Estrategia | Modo | Horario |
-|-----|---------|------------|------|---------|
-| **Sniper** | AWS `15.229.158.221` | `ChacalSniper_Bear44` | Dry Run | 24/7 |
-| **Volume Hunter** | PC Local | `ChacalVolumeHunter_V1` | En validación | A definir |
+> **Última actualización:** 2026-04-02
+> **Nota:** Cada proyecto tiene su propio maestro. Este archivo es solo referencia general compartida.
 
 ---
 
-## CÓMO ACTUALIZAR EL SERVER AWS (FLUJO OFICIAL)
+## ARQUITECTURA DUAL
 
-**Paso 1 — Hacés cambios en tu PC y los guardás en Git:**
+| Bot | Proyecto | Entorno | Estrategia | Modo | Maestro |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Sniper Bear** | `PROJECT_SNIPER_AWS/` | AWS `15.229.158.221` (servidor) | `ChacalSniper_Bear44` | SHORT (Bear) | `PROJECT_SNIPER_AWS/INSTRUCCIONES_CLINE_BEAR.md` |
+| **Volume Hunter** | `CHACAL_VOLUME_HUNTER/` | **PC Local** (tu máquina) | `ChacalVolumeHunter_V1` | LONG (Bull/Lateral) | `CHACAL_VOLUME_HUNTER/INSTRUCCIONES_CLINE_VOLUME.md` |
+
+---
+
+## ESTRUCTURA DEL REPOSITORIO
+
+```text
+CHACAL_ZERO_FRICTION/
+├── CHACAL_VOLUME_HUNTER/          ← Proyecto Volume Hunter (PC)
+│   ├── INSTRUCCIONES_CLINE_VOLUME.md  ← MAESTRO Volume Hunter
+│   ├── docker-compose.yml
+│   ├── check_market_trend.py
+│   └── user_data/
+├── PROJECT_SNIPER_AWS/            ← Proyecto Sniper Bear (AWS)
+│   ├── INSTRUCCIONES_CLINE_BEAR.md    ← MAESTRO Sniper Bear
+│   ├── docker-compose.yml
+│   └── user_data/
+├── strategies/                    ← Estrategias compartidas
+│   ├── ChacalVolumeHunter_V1.py
+│   ├── ChacalVolumeHunter_V1.json
+│   └── ChacalSniper_Bear44.py
+├── skills/                        ← Utilidades generales
+│   ├── ARCHITECTURE_REFERENCE.md  ← Este archivo
+│   ├── analyze_aws_trades.py
+│   └── llave-sao-paulo.pem
+└── mcp-server-nodejs/             ← Servidor MCP
 ```
+
+---
+
+## SERVIDOR AWS
+
+| Parámetro | Valor |
+| :--- | :--- |
+| IP | `15.229.158.221` |
+| Usuario | `ec2-user` |
+| Llave SSH | `skills/llave-sao-paulo.pem` |
+| Path Freqtrade | `/home/ec2-user/freqtrade` |
+
+### Cómo Actualizar el Server
+
+```bash
+# 1. Commit + push desde PC
 git add .
-git commit -m "descripción del cambio"
+git commit -m "descripción"
 git push origin master
-```
 
-**Paso 2 — Le decís al server que descargue los cambios:**
+# 2. Pull + restart en server
+ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 \
+  "cd /home/ec2-user/freqtrade && git pull origin master && docker-compose down && docker-compose up -d"
 ```
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/freqtrade && git pull origin master && docker-compose down && docker-compose up -d"
-```
-
-> ⚠️ El server tiene su propia copia de archivos. La llave `.pem` está en `skills/llave-sao-paulo.pem`.
-> El git en el server NO estaba configurado inicialmente. Se conectó como repo el 2026-04-01.
 
 ---
 
-## REGLAS DE SEGURIDAD (OBLIGATORIAS)
+## REGLAS DE SEGURIDAD
 
-1. **NUNCA subir** archivos de `configs/` — contienen tokens de Telegram y claves de Binance.
-2. **Los archivos ignorados** están en `.gitignore` — `CHACAL_VOLUME_HUNTER/user_data/configs/` está bloqueado.
-3. **Secrets solo viven en tu PC**, nunca en GitHub.
-4. Si GitHub manda alerta de "secret exposed" → hacer `git reset --hard <commit_anterior>` + `git push --force`.
-
----
-
-## REFERENCIA RÁPIDA DE ARCHIVOS
-
-| Archivo | Propósito |
-|---------|-----------|
-| `PROJECT_SNIPER_AWS/user_data/strategies/ChacalSniper_Bear44.py` | Estrategia Bear para AWS |
-| `CHACAL_VOLUME_HUNTER/user_data/strategies/ChacalVolumeHunter_V1.py` | Estrategia Volume para PC |
-| `CHACAL_VOLUME_HUNTER/user_data/configs/config_volume.json` | Config local PC (NO subir a Git) |
-| `PROJECT_SNIPER_AWS/docker-compose.aws.yml` | Template del compose de AWS |
-| `skills/llave-sao-paulo.pem` | Llave SSH del server AWS |
-| `skills/ROADMAP_SNIPER.md` | Historial de resultados y ADN del Sniper |
+1. ❌ **NUNCA subir** `*/user_data/configs/` a Git (tokens, claves)
+2. ❌ **NUNCA subir** `skills/llave-sao-paulo.pem` a Git
+3. ✅ `.gitignore` bloquea estas carpetas
+4. ✅ Secrets solo viven en PC local y servidor
 
 ---
 
-## CUÁNDO APLICA CADA ACCIÓN
+## MCP SERVER (CHACAL-ZERO-FRICTION)
 
-- **Cambio en estrategia Sniper** → Editar `.py` → `git push` → `ssh + git pull + docker restart` en AWS.
-- **Cambio en estrategia Volume** → Editar `.py` local → Backtest/Hyperopt → luego deploy.
-- **El server se cae** → `ssh → docker-compose up -d`
-- **Actualizar config del server** → `scp` del archivo local al server (los configs NO van a Git).
+Herramientas MCP disponibles:
+
+- `freqtrade_control` - Control del bot (status, profit, daily, balance)
+- `docker_freqtrade` - Comandos Docker (backtesting, hyperopt, list-data)
+- `crypto_market_intel` - Datos de mercado Binance (ticker, OHLCV)
+- `risk_manager` - Gestión de riesgo (Kelly, correlación, volatilidad)
+- `groq_intel_analysis` - Análisis IA con Groq
+- `aws_ssh_control` - Ejecutar SSH/SCP en AWS
+
+---
+
+## PARA LEER ANTES DE TRABAJAR
+
+| Si trabajas en... | Lee este archivo |
+| :--- | :--- |
+| Volume Hunter (Bull/Long) | `CHACAL_VOLUME_HUNTER/INSTRUCCIONES_CLINE_VOLUME.md` |
+| Sniper Bear (Short) | `PROJECT_SNIPER_AWS/INSTRUCCIONES_CLINE_BEAR.md` |
+| Arquitectura general | Este archivo |
