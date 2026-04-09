@@ -1,7 +1,7 @@
 # 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL
 
-> **Última actualización:** 2026-04-08
-> **Estado:** Repo en saneamiento. Migración a WSL. Evidencias separadas.
+> **Última actualización:** 2026-04-09
+> **Estado:** Avance Crítico. Dataset de Abril recuperado. Edge del bot verificado en WSL (+155%).
 
 ---
 
@@ -9,31 +9,38 @@
 
 | Proyecto | Estado | Entorno | Notas |
 |----------|--------|---------|-------|
-| 🦅 **Sniper Bear** | 🟢 **Foco Único** | WSL Nativo | Edge confirmado (>101% profit). Dataset Abril bajado OK. Filtrado macro (EMA200) aplicado. Diagnóstico letal: apagar el Kill Switch de 1m provoca 60% Drawdown y +23 liquidaciones cruzadas. |
-| 🦊 **Volume Hunter** | ⏸️ Pausado | WSL Nativo | En pausa hasta estabilizar la base Bear. |
-| 🔮 **Triple Mode** | ❌ Abortado temporal. | WSL Nativo | Rollback por conflictos de selectores. |
+| 🦅 **Sniper Bear** | 🟢 **Foco Único** | **WSL Nativo (Operativo)** | **BREAKTHROUGH:** Con data de Abril el bot rinde +155%. Se requiere Kill Switch 1m para evitar DD del 60% por liquidaciones. |
+| 🦊 **Volume Hunter** | ⏸️ Pausado | WSL Nativo | En pausa operacional hasta cerrar Sniper Bear. |
+| 🔮 **Triple Mode** | ❌ Abortado | WSL Nativo | Confirmado el retorno a estrategias atómicas especialistas. |
 
 ---
 
-## 🔴 BLOQUEOS Y HALLAZGOS CRÍTICOS
+## 🔴 BLOQUEOS Y HALLAZGOS CRÍTICOS (Sesión 2026-04-09)
 
-1. **El Edge de Abril Existe (Resolución):**
-   - El entorno *WSL + Makefile* logró descargar los datos perfectos de Abril 2024.
-   - El edge base aisladamente probó su vigencia: **Fase 2 arrojó +154.82% y Fase 3 (con filtro EMA200) arrojó +101.79%**.
+1. **Recuperación de Datos (Abril 2024):**
+   - Se logró la descarga limpia de Abril-Agosto 2024 via WSL nativo.
+   - **Resultado Backtest:** +154.82% Profit Bruto. El bot tiene un edge real masivo (Trailing Stop acumulado de +700%).
 
-2. **La Trampa de las Micro-velas (El 1m es Vida o Muerte):**
-   - Al quitar el Kill Switch de `1m`, descubrimos que la estrategia sufre un **Drawdown de ~60% y +23 liquidaciones**.
-   - **Conclusión Definitiva:** El bot es extremadamente rentable pero absolutamente dependiente de un stop de emergencia micro-scópico antes de que un pump cierre la vela de 5m con apalancamiento x5.
+2. **Veredicto "Kill Switch 1m":**
+   - Sin el Kill Switch de 1 minuto, el bot sufre 23-25 liquidaciones plenas en mercados laterales/rebotes violentos (Julio 2024).
+   - **Conclusión:** El timeframe de 1m es el "airbag" vital para operar futuros x5. No es opcional.
+
+3. **Filtro Macro EMA200:**
+   - Implementado en `ChacalSniper_Bear_No1m.py`. Redujo trades falsos pero no evita las liquidaciones de trades ya abiertos. El blindaje real debe ser en la salida (1m).
 
 ---
 
-## 📋 PRÓXIMOS PASOS (PLAN DE ACCIÓN - PRÓXIMA SESIÓN)
+## 📋 PRÓXIMOS PASOS (PLAN DE ACCIÓN - Mañana)
 
-1. **Ajuste del ADN Anti-Liquidación:**
-   - Calibrar los hard-stoploss (Particularmente ADA y BNB) en la tabla base de `ChacalSniper_Bear44.py`.
-   
-2. **Re-activación y Tuneo del Kill Switch 1m:**
-   - Volver a prender la condicional de escape basado en RSI de 1 minuto en el framework de la estrategia.
+1. **DNAs de Salida Anti-Liquidación:**
+   - Ajustar Stoploss fijos por par (especialmente ADA y BNB) para que actúen ANTES de la liquidación de Binance.
 
-3. **Validación Definitiva (Prueba de Fuego):**
-   - Correr Backtest final con Data limpia de Abril + Filtro Macro EMA200 + StopLoss estricto + Kill Switch activo. El objetivo es que el DD baje de 58% a <25%.
+2. **Re-activación y Optimización del Kill Switch 1m:**
+   - Volver a la base estable `ChacalSniper_Bear44.py`.
+   - Limpiar e integrar la lógica de 1m con el dataset nativo ya verificado.
+
+3. **Validación Final:**
+   - Correr backtest final con 1m activo buscando reducir el Drawdown del 60% a niveles institucionales (<25%).
+
+---
+*Para auditorías profundas, ver: `PROJECT_SNIPER_AWS/AUDITORIA_FILTROS_MACRO.md`*
