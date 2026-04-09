@@ -23,7 +23,7 @@ class ChacalSniper_Bear44(IStrategy):
     can_short: bool = True
 
     def informative_pairs(self):
-        return [("BTC/USDT:USDT", "1h"), ("BTC/USDT:USDT", "1m")]
+        return [("BTC/USDT:USDT", "1h")]
 
     hyperopt_dna = {
         "BTC/USDT:USDT":   {"v_factor": 4.660, "pulse_change": 0.004, "bear_roi": 0.022, "bear_sl": -0.031},
@@ -49,7 +49,7 @@ class ChacalSniper_Bear44(IStrategy):
 
     # --- space="sell" ---
     roi_base = DecimalParameter(0.01, 0.08, decimals=3, default=0.045, space="sell", optimize=True)
-    rsi_kill_switch = IntParameter(50, 85, default=70, space="sell", optimize=True)
+    rsi_kill_switch = IntParameter(35, 60, default=48, space="sell", optimize=True)
 
     # --- space="stoploss" ---
     bear_stoploss = DecimalParameter(-0.25, -0.01, decimals=3, default=-0.090, space="sell", optimize=True)
@@ -60,30 +60,11 @@ class ChacalSniper_Bear44(IStrategy):
     trailing_stop_positive_offset = 0.025
     trailing_only_offset_is_reached = True
 
-    stoploss = -0.12 # Red de seguridad final
+    stoploss = -0.075
     timeframe = '5m'
 
-    def _hardened_bear_sl(self, pair: str) -> float:
-        dna_sl = self.hyperopt_dna.get(pair, {"bear_sl": -0.09})["bear_sl"]
-        hard_caps = {
-            "ADA/USDT:USDT": -0.022,
-            "BNB/USDT:USDT": -0.048,
-        }
-        if pair in hard_caps:
-            dna_sl = max(dna_sl, hard_caps[pair])
-            if self.dp:
-                btc_1h = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1h")
-                if btc_1h is not None and not btc_1h.empty:
-                    btc_1h = btc_1h.copy()
-                    btc_1h['atr'] = ta.ATR(btc_1h, timeperiod=14)
-                    btc_1h['atr_mean'] = btc_1h['atr'].rolling(8).mean()
-                    last = btc_1h.iloc[-1]
-                    if pd.notna(last.get('atr')) and pd.notna(last.get('atr_mean')) and float(last['atr']) > float(last['atr_mean']):
-                        dna_sl *= 0.9
-        return dna_sl
-
     def _sl_for_pair(self, pair: str) -> float:
-        return self._hardened_bear_sl(pair)
+        return self.bear_stoploss.value
 
     def _roi_for_pair(self, pair: str) -> float:
         dna_roi = self.hyperopt_dna.get(pair, {"bear_roi": 0.03})["bear_roi"]
@@ -127,20 +108,6 @@ class ChacalSniper_Bear44(IStrategy):
             dataframe['master_bear_switch'] = (btc_trend_bear & btc_vol_active).astype(int)
         else:
             dataframe['master_bear_switch'] = 1 # Fail-safe
-
-        btc_1m = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1m")
-        if btc_1m is not None and not btc_1m.empty:
-            btc_1m = btc_1m.copy()
-            btc_1m['btc_rsi_1m'] = ta.RSI(btc_1m, timeperiod=14)
-            df_btc_1m = btc_1m[['date', 'btc_rsi_1m']].copy()
-            dataframe = pd.merge_asof(
-                dataframe.sort_values('date'),
-                df_btc_1m.sort_values('date'),
-                on='date',
-                direction='backward'
-            )
-        else:
-            dataframe['btc_rsi_1m'] = np.nan
             
         return dataframe
 
@@ -172,39 +139,15 @@ class ChacalSniper_Bear44(IStrategy):
 
     def custom_exit(self, pair: str, trade: 'Trade', current_time: datetime,
                     current_rate: float, current_profit: float, **kwargs):
-
-        # ── SALIDA 1: ROI alcanzado (la salida feliz) ──────────────────────
         roi_target = self._roi_for_pair(pair)
         if current_profit >= roi_target:
             return "bear_roi_hit"
 
-        # ── SALIDA 2: AIRBAG DE 1m (El Fino Institucional) ─────────────────
-        # GUARDA 1: El trade lleva más de 60 min abierto.
-        #           Si recién arrancó, el 1m no interfiere.
-        open_minutes = 0.0
-        if trade.open_date_utc:
-            open_minutes = (current_time - trade.open_date_utc).total_seconds() / 60.0
-        if open_minutes < 60:
-            return None
-
-        # GUARDA 2: Estamos en pérdida real (>1%).
-        #           Si vamos ganando o casi en cero, el bot no corta nada.
-        if current_profit > -0.01:
-            return None
-
-        # GUARDA 3: El RSI de 1m CRUZA al alza el umbral (rebote violento confirmado).
-        #           Solo el cruce importa, no que esté simplemente por encima.
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
-        if dataframe is not None and len(dataframe) > 1:
-            btc_rsi_1m_now  = float(dataframe.iloc[-1].get('btc_rsi_1m', np.nan))
-            btc_rsi_1m_prev = float(dataframe.iloc[-2].get('btc_rsi_1m', np.nan))
-
-            if (
-                pd.notna(btc_rsi_1m_now)
-                and pd.notna(btc_rsi_1m_prev)
-                and btc_rsi_1m_prev <= self.rsi_kill_switch.value
-                and btc_rsi_1m_now  >  self.rsi_kill_switch.value
-            ):
-                return "airbag_1m_rebote_violento"
-
+        if dataframe is not None and len(dataframe) > 0:
+            last_candle = dataframe.iloc[-1]
+            current_rsi = float(last_candle.get('rsi', 50.0))
+            current_adx = float(last_candle.get('adx', 0.0))
+            if current_rsi > self.rsi_kill_switch.value and current_adx > self.adx_threshold.value:
+                return "rsi_kill_switch_short"
         return None

@@ -1,7 +1,8 @@
 # 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL
 
 > **Última actualización:** 2026-04-09
-> **Estado:** Avance Crítico. Dataset de Abril recuperado. Edge del bot verificado en WSL (+155%).
+> **Estado:** ¡ÉXITO TOTAL! Bear44 validado en WSL (+27% profit / 23% DD en Abril).
+> **Entorno:** WSL Nativo Operativo al 100%. 🦅
 
 ---
 
@@ -9,9 +10,9 @@
 
 | Proyecto | Estado | Entorno | Notas |
 |----------|--------|---------|-------|
-| 🦅 **Sniper Bear** | 🟢 **Foco Único** | **WSL Nativo (Operativo)** | **BREAKTHROUGH:** Con data de Abril el bot rinde +155%. Se requiere Kill Switch 1m para evitar DD del 60% por liquidaciones. |
-| 🦊 **Volume Hunter** | ⏸️ Pausado | WSL Nativo | En pausa operacional hasta cerrar Sniper Bear. |
-| 🔮 **Triple Mode** | ❌ Abortado | WSL Nativo | Confirmado el retorno a estrategias atómicas especialistas. |
+| 🦅 **Sniper Bear** | 🔵 **Operativo** | **WSL Nativo (Validado)** | **BRAVO:** Bear44 rinde +27% en Abril con 0 liquidaciones. Airbag 1m operativo. |
+| 🦊 **Volume Hunter** | ⏸️ Pausado | WSL Nativo | Próximo objetivo tras estabilizar Bear. |
+| 🔮 **Triple Mode** | 💀 ELIMINADO | - | Purgado del ecosistema por baja eficiencia. |
 
 ---
 
