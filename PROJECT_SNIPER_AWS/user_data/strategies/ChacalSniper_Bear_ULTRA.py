@@ -156,6 +156,8 @@ class ChacalSniper_Bear_ULTRA(IStrategy):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is not None and len(dataframe) > 0:
             last_candle = dataframe.iloc[-1]
+            rsi_1m = float(last_candle.get('rsi_1m', 50.0))
+            price_rebound_1m = float(max(last_candle.get('price_change_1m', 0.0), 0.0))
             
             # --- KILL SWITCH 1M (RE-ACTIVADO) ---
             # --- MODO ADAPTATIVO ---
