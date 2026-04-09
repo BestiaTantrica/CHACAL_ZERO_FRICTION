@@ -8,21 +8,19 @@ EPOCHS ?= 100
 TIMERANGE ?= 20240801-20240901
 
 # ====== RUTAS ABSOLUTAS ======
-USER_HOME := $(shell bash -lc 'printf "%s" "$$HOME"')
-ROOT ?= $(USER_HOME)/chacal_zero_friction
-VENV ?= $(ROOT)/.venv
-FT ?= $(VENV)/bin/freqtrade
+ROOT := $(PWD)
+FT := ~/.venv_freqtrade/bin/freqtrade
 
-STRATEGY_PATH := $(ROOT)/shared/strategies
+STRATEGY_PATH := $(ROOT)/PROJECT_SNIPER_AWS/user_data/strategies
 
-BEAR_USERDATA := $(ROOT)/projects/bear/user_data
+BEAR_USERDATA := $(ROOT)/PROJECT_SNIPER_AWS/user_data
 BEAR_CONFIG := $(BEAR_USERDATA)/configs/config_backtest.json
-BEAR_DATADIR := $(BEAR_USERDATA)/data
+BEAR_DATADIR := $(BEAR_USERDATA)/data/binance/futures
 BEAR_STRATEGY ?= ChacalSniper_Bear_ULTRA
 
-BULL_USERDATA := $(ROOT)/projects/bull/user_data
+BULL_USERDATA := $(ROOT)/CHACAL_VOLUME_HUNTER/user_data
 BULL_CONFIG := $(BULL_USERDATA)/configs/config_backtest.json
-BULL_DATADIR := $(BULL_USERDATA)/data
+BULL_DATADIR := $(BULL_USERDATA)/data/binance/futures
 BULL_STRATEGY ?= ChacalVolumeHunter_V1
 
 .PHONY: help doctor list-data-bear list-data-bull list-data download-data-bear download-data-bull download-data download-data-bear-fresh download-data-bull-fresh backtest-bear backtest-bull backtest-bear-with-protections backtest-bull-with-protections hyperopt-bear-entry hyperopt-bear-risk hyperopt-bear-protection hyperopt-bull-entry hyperopt-bull-risk hyperopt-bull-protection sync-aws
