@@ -1,104 +1,44 @@
 # 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL
-## Actualizar este archivo AL FINAL DE CADA SESIÓN
 
-> **Última actualización:** 2026-04-06 — Sesión: Despliegue Sniper ULTRA v2.2 Adaptativa
-> **Próxima acción:** Arrancar Dry Run del Volume Hunter en PC Local
+> **Última actualización:** 2026-04-08
+> **Estado:** Repo en saneamiento. Migración a WSL. Evidencias separadas.
 
 ---
 
 ## 🚦 ESTADO EN TIEMPO REAL
 
-| Bot | Estado | Estrategia | Entorno | Modo | Última acción |
-|-----|--------|------------|---------|------|----------------|
-| 🦅 **Sniper Bear** | ✅ Dry Run ACTIVO | ChacalSniper_Bear_ULTRA (v2.2) | AWS `15.229.158.221` | SHORT | ULTRA v2.2 con Airbag 1m y Candado Anti-Bull |
-| 🦊 **Volume Hunter** | ⏸️ Pendiente arranque | ChacalVolumeHunter_V1 | PC Local | LONG | Epoch 184 inyectado, listo para arrancar |
-| 🔮 **Lateral Hunter** | ❌ No existe aún | — | — | — | En roadmap |
+| Proyecto | Estado | Entorno | Notas |
+|----------|--------|---------|-------|
+| 🦅 **Sniper Bear** | 🟢 **Foco Único** | WSL Nativo | Confirmado: Base Bear44 histórica correcta no replica +118.1% con dataset actual. Problema de incompatibilidad de datos (falta abril real). |
+| 🦊 **Volume Hunter** | ⏸️ Pausado | WSL Nativo | En pausa hasta estabilizar la base Bear. |
+| 🔮 **Triple Mode** | ❌ Abortado temporal. | WSL Nativo | Rollback realizado por errores de selectores y superposición de paradas. |
 
 ---
 
-## 🟢 ALERTAS RESUELTAS
-- **Kill Switch 1m en Bear ULTRA:** ✅ IMPLEMENTADO (Airbag 0.8% @ 1m + Timeout 12h/24h).
-- **Git desincronizado AWS/Local:** ✅ SINCRONIZADO (Git Reset --hard master ejecutado en AWS).
-- **Morfología Adaptativa:** ✅ BTC RSI 1h Lock implementado (<40) para evitar bull traps.
+## 🔴 BLOQUEOS Y HALLAZGOS CRÍTICOS
 
-## 🔴 ALERTAS ACTIVAS (requieren acción)
+1. **Hallazgo Duro Bear44 (2026-04-08):**
+   - Se reconstruyó la versión exacta de `ChacalSniper_Bear44.py` (commit `d4ca776`) y JSON Época 46. Se verificó con logs que Freqtrade la cargó.
+   - **Resultado actual:** Jun-Jul (-16.41%), Stress actual (efectivo may-ago: -23.05%).
+   - **Conclusión:** Descartado el error de versión o código pisado. El problema es la discrepancia de datos históricos (el periodo original de abril no está en el dataset actual) y la activación tardía del macro switch en mayo.
 
-### ALERTA 1 — Dry Run Volume Hunter sin arrancar
-- **Severidad:** ALTA
-- **Problema:** El Volume Hunter tiene Epoch 184 inyectado y validado, pero el Dry Run local nunca arrancó.
-- **Impacto:** Perdemos días de validación real en simulación.
-- **Acción:** Arrancar contenedor `chacal_volume_dryrun` en PC Local.
-- **Responsable:** Próxima sesión.
+2. **Árbol de Trabajo Sucio:**
+   - Hay múltiples archivos no trackeados y versiones experimentales en la raíz. Todo lo posterior al commit `942ac9f` debe ser consolidado y commiteado temáticamente.
 
 ---
 
-## 📈 PERFORMANCE ACTUAL
+## 📋 PRÓXIMOS PASOS (PLAN DE ACCIÓN)
 
-### 🦅 Sniper Bear — Métricas Clave
-| Periodo | Profit | Drawdown | Trades | Winrate | Config |
-|---------|--------|----------|--------|---------|--------|
-| Abr-Sep 2024 (Stress) | +118.1% | 26.04% | — | — | Master Switch v1 |
-| **Ago 2024 (ULTRA v2.2)**| **+15.5%** | **~8%** | — | — | **Airbag 1m + RSI Lock** |
+1. **Saneamiento del Repositorio:**
+   - Separar basura y archivos huérfanos.
+   - Commits temáticos (docs, scripts, WSL/Makefile, experimentales) para limpiar el árbol local.
 
-**⚠️ Sniper Bear v2.2 Validado: El Airbag redujo pérdidas en un 70% comparado con v1.0.**
+2. **Resolución de Incompatibilidad de Datos:**
+   - Investigar mecanismo para conseguir el dataset completo de Abril 2024.
+   - Revisar lógica de *master bear switch* para que no tarde en prender o apagar en los meses intermedios como mayo/julio.
 
-### 🦊 Volume Hunter — Métricas Clave
-| Periodo | Profit | Drawdown | Trades | Winrate | Config |
-|---------|--------|----------|--------|---------|--------|
-| Feb 2024 (Super Bull) | +129.67% | <10% | 120 | 93.3% | Epoch 184 |
-| Jul 2025 | +139.28% | <10% | 160 | 93.8% | Epoch 184 |
+3. **Arquitectura No-Fricción en WSL:**
+   - Completar transición de todos los lanzamientos de Freqtrade vía `Makefile`.
 
 ---
-
-## 📋 PARÁMETROS ACTIVOS EN CADA BOT
-
-### 🦅 Sniper Bear (AWS) — ULTRA v2.2 ADAPTATIVA
-```python
-# LÓGICA DE ESCUDO
-rsi_1h_btc_lock = < 40  # Candado Anti-Bull
-airbag_1m_trigger = 0.008  # Salida inmediata ante rebote rápido
-timeout_loss_12h = True  # Cierre forzado de zombis
-```
-
-### 🦊 Volume Hunter (PC) — Época 184 (GRABADO EN PIEDRA)
-- Configuración validada y lista para Dry Run.
-
----
-
-## 🗓️ LOG DE SESIONES (Más reciente primero)
-
-### Sesión 2026-04-06 — Despliegue Sniper ULTRA v2.2 Adaptativa
-**Objetivo:** Eliminar trades zombie y blindar el bot contra mercados alcistas.
-**Hitos conseguidos:** 
-- Mutación de la estrategia a v2.2 (Lógica de tiempo y RSI Macro).
-- Sincronización total Git AWS ↔ Local (Reset Hard).
-- Despliegue exitoso en AWS: `Chacal_Sniper_ULTRA` corriendo con nuevo `docker-compose`.
-- Verificación de mercado con MCP: BTC en pump ($69k), bot en modo vigía esperando RSI < 40.
-
-**Pendientes generados:**
-- [ ] Monitorizar Telegram para primer trade ULTRA.
-- [ ] Iniciar Volume Hunter en PC Local.
-
----
-
-## ⚙️ ESTADO DE INFRAESTRUCTURA
-
-### Git
-```
-Branch: master
-Sincronización AWS: ✅ COMPLETA (Reset Hard Master)
-.gitignore: ✅ configs/, skills/*.pem, data/ (Protegidos)
-```
-
-### AWS Server
-```
-IP: 15.229.158.221
-Estado instancia: ✅ Operativa
-Container: Chacal_bot_definitivo (Renombrado a Sniper_ULTRA)
-Estrategia: ChacalSniper_Bear_ULTRA.py (v2.2)
-```
-
-### PC Local
-```
-Estado: LISTO PARA ARRANQUE VOLUME HUNTER
-```
+*Para auditorías profundas, ver los archivos en `AUDITORIA_*.md` en cada proyecto respectivo.*

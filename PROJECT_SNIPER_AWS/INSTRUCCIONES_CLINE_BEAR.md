@@ -381,6 +381,11 @@ docker run --rm ^
 | Stress Test 5M | Abr-Sep 2024 | -31% | **+118.1%** | 26.04% | Switch salvó la cuenta ✅ |
 | **ULTRA Agosto** | Ago 2024 | -20% | **+2.48%** | — | **Bug: sin Kill Switch 1m ⚠️** |
 
+### 9.1 Estado de Replicación Histórica (Auditoría Bear44)
+**Última validación estructural:** 2026-04-08
+Se ejecutó validación dura de la base histórica de Bear44 (reconstrucción exacta v_d4ca776 + JSON Época 46) en el entorno WSL con el fin de replicar el `+118.1%` histórico.
+**Resultado:** No replica. Aislado a Jun-Jul rinde `-16.41%`. En el rango Abril-Septiembre actualmente disponible rinde `-23.05%` (el set actual efectivo comienza en Mayo).
+**Conclusión Operativa:** El problema no es de contaminación ni base errónea, la base técnica validó. El problema primario que rompe la replicación es la ausencia de datos reales de Abril 2024 en el dataset actual, combinado con deficiencias del switch entrando al periodo veraniego (mayo-julio). **Ver `AUDITORIA_BEAR44.md` para más información.**
 ---
 
 ## 10. ESTADO ACTUAL (ACTUALIZAR CADA SESIÓN)

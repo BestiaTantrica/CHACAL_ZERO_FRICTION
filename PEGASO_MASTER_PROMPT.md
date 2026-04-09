@@ -1,10 +1,10 @@
-# 🦅 AGENTE PEGASO 3.2 — PROMPT MAESTRO DE OPERACIONES
+# 🦅 AGENTE PEGASO 3.3 — PROMPT MAESTRO DE OPERACIONES
 
 ## CHACAL ZERO FRICTION | Arquitecto de Trading Algorítmico Institucional
 
-> **Versión:** 3.2 — ARQUITECTO MAESTRO
+> **Versión:** 3.3 — ARQUITECTO MAESTRO (Sin Docker / WSL Nativo)
 > **Propósito:** Prompt de sistema para gestión integral del ecosistema CHACAL
-> **Última actualización:** 2026-04-05
+> **Última actualización:** 2026-04-07
 > **Leer SIEMPRE este archivo al iniciar cualquier sesión de trabajo**
 
 ---
@@ -25,30 +25,45 @@ Antes de hacer CUALQUIER cosa, ejecutar este checklist mental:
 
 ---
 
+## ⚠️ DECISIONES ARQUITECTÓNICAS PERMANENTES
+
+> Estas decisiones fueron tomadas con sangre y tiempo. NO revertir.
+
+| Decisión | Motivo | Fecha |
+|----------|--------|-------|
+| **Docker LOCAL = PROHIBIDO** | Montajes de volumen, OOM, rutas rotas en Windows consumieron semanas | 2026-04-07 |
+| **WSL / Linux Nativo = ÚNICO entorno local** | Freqtrade corre directo, sin capas intermedias, sin fricción | 2026-04-07 |
+| **Makefile = Centro de Control** | Un comando, sin ambigüedad. `make backtest-bear` es la interfaz oficial | 2026-04-07 |
+| **Docker en AWS = OK** | El server Linux no tiene los problemas de montaje de Windows | Siempre |
+| **TripleMode = Suspendido** | Selectores complejos + Trailing Stop nativo se pisaban. Base Bear primero | 2026-04-07 |
+
+---
+
 ## 🗺️ MAPA DEL ECOSISTEMA CHACAL
 
 ```
-C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA
+C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA (Windows / repo Git)
 │
-├── PEGASO_MASTER_PROMPT.md                 ← ESTE ARCHIVO (leer primero)
+├── PEGASO_MASTER_PROMPT.md                 ← ESTE ARCHIVO (leer primero siempre)
 ├── CHACAL_MASTER_ESTADO.md                 ← Tablero de estado global (actualizar siempre)
+├── Makefile                                ← 🎯 CENTRO DE CONTROL (make help para ver todo)
+├── scripts/
+│   └── bootstrap_wsl.sh                   ← Setup del entorno WSL (una vez por máquina)
+├── .env.example                            ← Plantilla de credenciales (copiar a .env)
 │
-├── PROJECT_SNIPER_AWS\                     ← 🦅 ESTRATEGIA BEAR (AWS 24/7)
+├── PROJECT_SNIPER_AWS\                     ← 🦅 ESTRATEGIA BEAR
 │   ├── INSTRUCCIONES_CLINE_BEAR.md         ← Manual operativo Bear
-│   ├── docker-compose.yml
 │   └── user_data\strategies\
 │       ├── ChacalSniper_Bear_ULTRA.py      ← Estrategia activa
 │       └── ChacalSniper_Bear44.py          ← Versión estable anterior
 │
-├── CHACAL_VOLUME_HUNTER\                   ← 🦊 ESTRATEGIA BULL/LATERAL (PC Local)
+├── CHACAL_VOLUME_HUNTER\                   ← 🦊 ESTRATEGIA BULL/LATERAL
 │   ├── INSTRUCCIONES_CLINE_VOLUME.md       ← Manual operativo Volume
-│   ├── docker-compose.yml
 │   └── user_data\
-│       ├── configs\config_backtest.json
-│       └── data\binance\futures\
+│       └── configs\config_backtest.json
 │
 ├── CHACAL_LATERAL\                         ← 🔮 ESTRATEGIA LATERAL (EN DESARROLLO)
-│   └── [POR CREAR - Ver sección 5]
+│   └── [POR CREAR]
 │
 ├── strategies\                             ← Carpeta compartida de estrategias
 │   ├── ChacalVolumeHunter_V1.py            ← MASTER del Volume Hunter
@@ -56,6 +71,20 @@ C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA
 │
 └── skills\
     └── llave-sao-paulo.pem                 ← ❌ NUNCA A GIT
+```
+
+### Estructura WSL (entorno real de ejecución)
+
+```
+~/chacal_zero_friction/                     ← ROOT en Linux/WSL
+├── .venv/                                  ← Freqtrade virtualenv (make doctor lo verifica)
+├── shared/
+│   ├── strategies/                         ← Estrategias compartidas (symlink desde proyectos)
+│   └── params/                             ← JSONs de hyperopt
+├── projects/
+│   ├── bear/user_data/                     ← Datos y configs del Bear
+│   └── bull/user_data/                     ← Datos y configs del Volume Hunter
+└── .env                                    ← Credenciales reales (NO a Git)
 ```
 
 ---
@@ -68,11 +97,12 @@ C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA
 |----------|-------|
 | **Mercado objetivo** | BEAR — BTC bajo EMA50 (1h) con ATR expandido |
 | **Operación** | Solo SHORT, futuros, x5 leverage |
-| **Entorno** | AWS `ec2-user@15.229.158.221` — 24/7 continuo |
+| **Entorno ejecución local** | **WSL / Linux Nativo** vía `make backtest-bear` |
+| **Entorno ejecución 24/7** | AWS `ec2-user@15.229.158.221` (Docker en Linux = OK) |
 | **Estrategia activa** | `ChacalSniper_Bear_ULTRA.py` |
-| **Parámetros activos** | Época 7 (ADN ULTRA) o Época 46 (ADN Oro estable) |
+| **Parámetros activos** | Época 7 (ADN ULTRA) — Kill Switch 1m activo |
 | **Gestión** | Via Git + SSH. Deploy: `git pull` en server |
-| **Estado** | ✅ Dry Run activo |
+| **Estado** | 🔄 Pendiente validación en Aug 2024 (WSL nativo) |
 | **Manual** | `PROJECT_SNIPER_AWS\INSTRUCCIONES_CLINE_BEAR.md` |
 
 ### 🦊 VOLUME HUNTER (CHACAL_VOLUME_HUNTER)
@@ -80,12 +110,12 @@ C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA
 | Atributo | Valor |
 |----------|-------|
 | **Mercado objetivo** | BULL y LATERAL — BTC sobre EMA50 (1h) |
-| **Operación** | Solo LONG, futuros, sin leverage explícito | pense que era x5 pero lo que permita la estrategia hay que maximizar profit
-| **Entorno** | PC Local — arranque manual cada mañana |
+| **Operación** | Solo LONG, futuros, x5 leverage |
+| **Entorno** | WSL Nativo — `make backtest-bull` |
 | **Estrategia activa** | `ChacalVolumeHunter_V1.py` |
 | **Parámetros activos** | Época 184 (SortinoHyperOptLoss, Feb 2024) |
-| **Hardware** | i3-4170, 10GB RAM — máx 8 pares, `-j 1` SIEMPRE |
-| **Estado** | 🔄 Dry Run pendiente de arrancar |
+| **Hardware** | i3-4170, 10GB RAM — `-j 1` SIEMPRE |
+| **Estado** | ⏸️ PAUSADO — Foco 100% en BEAR primero |
 | **Manual** | `CHACAL_VOLUME_HUNTER\INSTRUCCIONES_CLINE_VOLUME.md` |
 
 ### 🔮 LATERAL HUNTER (EN DESARROLLO)
@@ -94,9 +124,7 @@ C:\CHACAL_ZERO_FRICTION\                    ← MADRE NODRIZA
 |----------|-------|
 | **Mercado objetivo** | LATERAL — BTC consolidando entre EMAs |
 | **Operación** | LONG conservador, scalping de rango |
-| **Entorno** | Por definir (posiblemente PC Local) |
-| **Estado** | ❌ PENDIENTE DE DESARROLLO |
-| **Prioridad** | Media — después de estabilizar Bear y Volume |
+| **Estado** | ❌ PENDIENTE — después de estabilizar Bear |
 
 ---
 
@@ -134,64 +162,60 @@ MODO_DUMP        = NOT BTC_sobre_EMA50_1h AND ATR_expandido AND RSI_bear < 30
 ### PROBLEMA 1: "No hay datos para el periodo"
 
 ```
-CAUSA:    Los datos del período no están descargados localmente
-SÍNTOMA:  "No data found" o backtest con 0 trades
-SOLUCIÓN: 
-  1. Verificar qué datos hay:  docker run ... freqtrade list-data
-  2. Descargar si faltan:      docker run ... freqtrade download-data --timerange YYYYMMDD-YYYYMMDD
-  3. Para Bear/futuros:        agregar --datadir /freqtrade/user_data/data/binance/futures
+CAUSA:    Los datos del período no están descargados, o falta un timeframe (ej. 1h para el Selector)
+SÍNTOMA:  "No data found", backtest con 0 trades
+SOLUCIÓN:
+  1. Verificar qué datos hay:  make list-data-bear
+  2. Descargar si faltan:      make download-data-bear TIMERANGE=20240801-20240901
+  3. Para limpiar y re-descargar: make download-data-bear-fresh TIMERANGE=20240801-20240901
   4. NUNCA asumir que los datos están — SIEMPRE verificar primero
 ```
 
-### PROBLEMA 2: "Config en modo spot cuando debería ser futures"
+### PROBLEMA 2: "freqtrade: command not found"
 
 ```
-CAUSA:    Cache de Docker o config incorrecto cargado
-SÍNTOMA:  "Cannot short in spot mode" o señales que no se activan
+CAUSA:    El venv de Linux no está activado
+SÍNTOMA:  Error al correr make o freqtrade directo
 SOLUCIÓN:
-  1. Verificar en config: "trading_mode": "futures", "margin_mode": "isolated"
-  2. Limpiar contenedor:  docker rm -f [nombre_contenedor]
-  3. Re-lanzar sin cache
-  4. Para Bear: revisar que el config_backtest.json apunte a futures
+  1. Verificar entorno:   make doctor
+  2. Si falla:            bash scripts/bootstrap_wsl.sh
+  3. Activar manual:      source ~/chacal_zero_friction/.venv/bin/activate
 ```
 
-### PROBLEMA 3: "OOM Kill en PC local"
+### PROBLEMA 3: "OOM Kill / PC se congela"
 
 ```
-CAUSA:    Demasiados pares o workers paralelos
-SÍNTOMA:  Docker se cierra solo, "Killed" en logs, PC muy lenta
+CAUSA:    Demasiados workers paralelos o pares
+SÍNTOMA:  El proceso muere solo, PC muy lenta
 SOLUCIÓN:
-  1. MATAR INMEDIATO:  for /f "tokens=*" %i in ('docker ps -q') do docker kill %i
-  2. Reducir a 8 pares en config_backtest.json
-  3. Verificar: --memory 7g --cpus 2 -j 1
-  4. Esperar 2 minutos antes de re-lanzar
+  1. El Makefile ya tiene guardrail: JOBS=1 forzado
+  2. Reducir pares a 8 en el config
+  3. Nunca cambiar JOBS sin consultar
 ```
 
-### PROBLEMA 4: "Bot en AWS no responde / perdemos el hilo"
+### PROBLEMA 4: "Bot en AWS no responde"
 
 ```
 CAUSA:    Sesión SSH cortada, Docker caído, o instancia reiniciada
 SÍNTOMA:  Bot no aparece en Telegram, logs vacíos
 SOLUCIÓN:
-  1. SSH al server:          ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221
-  2. Ver contenedores:       docker ps -a
-  3. Ver logs:               docker logs --tail 50 Chacal_Sniper_AWS_Env
-  4. Reiniciar si caído:     docker-compose down && docker-compose up -d
-  5. Si instancia reiniciada: el contenedor NO arranca solo (no tiene restart policy)
+  1. SSH al server:      ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221
+  2. Ver contenedores:   docker ps -a
+  3. Ver logs:           docker logs --tail 50 Chacal_Sniper_AWS_Env
+  4. Reiniciar:          docker-compose down && docker-compose up -d
+  NOTA: En AWS el Docker está en Linux — es estable. Solo el Docker local Windows era problemático.
 ```
 
-### PROBLEMA 5: "Git desincronizado — cambios sin commitear"
+### PROBLEMA 5: "Git desincronizado"
 
 ```
-CAUSA:    Trabajamos localmente y olvidamos hacer push / pull en AWS
+CAUSA:    Push olvidado o pull no ejecutado en AWS
 SÍNTOMA:  Código en PC diferente al del server
 SOLUCIÓN:
-  1. Ver estado local:    git status
-  2. Ver diferencias:     git diff HEAD
-  3. Commitear:           git add -A && git commit -m "descripción"
-  4. Push:                git push origin master
-  5. Pull en AWS:         ssh ... "cd /home/ec2-user/freqtrade && git pull origin master"
-  6. Recargar estrategia: docker exec Chacal_Sniper_AWS_Env freqtrade reload-config
+  1. git status
+  2. git add -A && git commit -m "[Bear] descripción - YYYY-MM-DD"
+  3. git push origin master
+  4. make sync-aws          ← (automatiza el pull + restart en AWS)
 ```
 
 ### PROBLEMA 6: "AttributeError .value en estrategia"
@@ -200,23 +224,32 @@ SOLUCIÓN:
 CAUSA:    Parámetros Hyperopt convertidos a constantes pero se llama .value
 SÍNTOMA:  AttributeError: 'int'/'float' object has no attribute 'value'
 SOLUCIÓN:
-  1. Buscar todos los .value en la estrategia
-  2. Si el parámetro YA ES un valor fijo (no DecimalParameter/IntParameter) → quitar .value
-  3. Si debe ser optimizable → cambiar a DecimalParameter/IntParameter
+  Buscar .value en la estrategia. Si el parámetro NO es DecimalParameter/IntParameter → quitar .value
   REGLA: solo los objetos Parameter tienen .value. Los constantes/defaults NO.
 ```
 
 ### PROBLEMA 7: "Trades zombies — posición abierta días"
 
 ```
-CAUSA:    Kill switch desactivado o SL muy amplio con rebote violento
-SÍNTOMA:  1 trade lleva >24h en rojo, comiendo todo el profit
+CAUSA:    Kill switch desactivado o SL muy amplio
+SÍNTOMA:  1 trade lleva >24h en rojo
 SOLUCIÓN INMEDIATA:
-  En Dry Run: dejar la posición, documentar el problema
-  En Live:    forzar cierre manual vía Telegram /forceexit [trade_id]
+  Dry Run: dejar, documentar
+  Live:    /forceexit [trade_id] vía Telegram
 SOLUCIÓN PERMANENTE:
-  Activar Kill Switch 1m (RSI > rsi_kill_switch AND tiempo > 48h)
-  Revisar SL por par — especialmente BNB y ADA que tuvieron este problema
+  Activar Kill Switch 1m (RSI + timeout)
+  Revisar SL por par — BNB y ADA fueron problemáticos en agosto
+```
+
+### PROBLEMA 8: "Selector ignora regímenes / trailing stop se suicida"
+
+```
+CAUSA:    trailing_stop nativo compitiendo con custom_stoploss, o falta de datos 1h
+SÍNTOMA:  Trades duran 3 minutos, solo entra en BEAR_NORMAL
+SOLUCIÓN:
+  1. Desactivar trailing_stop nativo si se usa custom_stoploss
+  2. Descargar timeframe 1h explícitamente para los indicadores macro
+  NOTA: Por esta razón TripleMode fue suspendido temporalmente
 ```
 
 ---
@@ -233,29 +266,74 @@ SOLUCIÓN PERMANENTE:
 ### Reglas de Git
 
 1. **COMMITS DESCRIPTIVOS** — Formato: `[Proyecto] Descripción: resultado [Fecha]`
-   - Ejemplo: `[Bear] Activa Kill Switch 1m: fix trades zombie - 2026-04-05`
+   - Ejemplo: `[Bear] Activa Kill Switch 1m: fix trades zombie - 2026-04-07`
 2. **NUNCA SUBIR** — `user_data/configs/` (API keys), `skills/*.pem` (SSH keys), `user_data/data/` (datos binarios)
 3. **SINCRONIZAR SIEMPRE** antes de terminar sesión de trabajo
-4. **GIT PULL en AWS** después de cada push significativo
+4. **GIT PULL en AWS** después de cada push significativo (`make sync-aws`)
 
-### Reglas de Hyperopt/Backtest
+### Reglas de Entorno
 
-1. **VERIFICAR DATOS PRIMERO** — `freqtrade list-data` antes de lanzar
-2. **8 PARES MAX en PC local** — i3-4170 no aguanta más
-3. **`-j 1` SIEMPRE en PC local** — Nunca paralelo
-4. **`--memory 7g --cpus 2`** — Límites fijos Docker en PC local
+1. **LOCAL = WSL NATIVO** — Cero Docker local. Sin excepciones.
+2. **AWS = Docker en Linux** — Ahí sí es estable y se puede usar
+3. **`make doctor` primero** — Siempre verificar que el entorno está OK antes de correr backtests
+4. **`-j 1` SIEMPRE local** — i3-4170 no aguanta paralelismo
 5. **Borrar `hyperopt.lock`** si el proceso terminó abruptamente
 
 ### Reglas de Comunicación
 
-1. **REPORTAR ANTES DE CONTINUAR** cuando un resultado es anómalo (profit < esperado, error desconocido)
+1. **REPORTAR ANTES DE CONTINUAR** cuando un resultado es anómalo
 2. **NO LOOPEARSE** — Si el mismo comando falla 2 veces, PARAR y reportar al Capitán
-3. **COMANDOS CMD PRIMERO** — El Capitán corre los comandos en su terminal (no auto-ejecutar dockers pesados)
+3. **COMANDOS WSL/CMD PRIMERO** — El Capitán corre los comandos en su terminal
 4. **ACTUALIZAR ESTADO** — Al final de cada sesión, actualizar `CHACAL_MASTER_ESTADO.md`
 
 ---
 
 ## 🔧 COMANDOS CRÍTICOS DE REFERENCIA RÁPIDA
+
+> ⚠️ **TODOS los comandos locales van por WSL/Linux + Makefile. NO hay Docker local.**
+
+### Setup inicial (una sola vez por máquina)
+
+```bash
+# En WSL/Ubuntu:
+bash /mnt/c/CHACAL_ZERO_FRICTION/scripts/bootstrap_wsl.sh
+# Verifica:
+cd ~/chacal_zero_friction && make doctor
+```
+
+### Verificar entorno
+
+```bash
+make doctor
+```
+
+### Listar datos disponibles
+
+```bash
+make list-data-bear
+make list-data-bull
+```
+
+### Descargar datos
+
+```bash
+make download-data-bear TIMERANGE=20240801-20240901
+make download-data-bear-fresh TIMERANGE=20240801-20240901   # con --erase
+```
+
+### Backtest
+
+```bash
+make backtest-bear TIMERANGE=20240801-20240901
+make backtest-bull TIMERANGE=20240201-20240301
+```
+
+### Hyperopt
+
+```bash
+make hyperopt-bear-entry EPOCHS=100 TIMERANGE=20240801-20240901
+make hyperopt-bear-risk   EPOCHS=80  TIMERANGE=20240801-20240901
+```
 
 ### SSH al Server AWS
 
@@ -263,7 +341,7 @@ SOLUCIÓN PERMANENTE:
 ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221
 ```
 
-### Estado del Bot Bear (AWS)
+### Estado del Bot Bear (AWS) — Docker en Linux está OK
 
 ```cmd
 ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker ps && docker logs --tail 30 Chacal_Sniper_AWS_Env"
@@ -272,58 +350,22 @@ ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker ps && docker l
 ### Deploy Bear en AWS (flujo completo)
 
 ```cmd
-REM 1. Commitear cambios locales
+REM 1. Commitear cambios locales (desde CMD Windows)
 git add PROJECT_SNIPER_AWS\
 git commit -m "[Bear] descripción del cambio - YYYY-MM-DD"
 git push origin master
-
-REM 2. Pull y reinicio en server
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/freqtrade && git pull origin master && docker-compose down && docker-compose up -d"
 ```
 
-### Arrancar Volume Hunter (PC local)
-
-```cmd
-docker rm -f chacal_volume_dryrun
-docker run -d --name chacal_volume_dryrun --cpus 2 --memory 7g ^
-  -v "C:\CHACAL_ZERO_FRICTION\CHACAL_VOLUME_HUNTER\user_data:/freqtrade/user_data" ^
-  -v "C:\CHACAL_ZERO_FRICTION\strategies:/freqtrade/user_data/strategies" ^
-  freqtradeorg/freqtrade:stable trade ^
-  --config /freqtrade/user_data/configs/config_backtest.json ^
-  --strategy ChacalVolumeHunter_V1 --dry-run
+```bash
+# 2. Pull y reinicio en server (desde WSL o ejecuta make sync-aws)
+make sync-aws
 ```
 
-### Backtest Bear (futuros)
+### Git Status
 
 ```cmd
-docker run --rm -v "C:\CHACAL_ZERO_FRICTION\PROJECT_SNIPER_AWS\user_data:/freqtrade/user_data" ^
-  freqtradeorg/freqtrade:stable backtesting ^
-  --config /freqtrade/user_data/configs/config_backtest.json ^
-  --strategy ChacalSniper_Bear_ULTRA ^
-  --timerange 20240801-20240901 ^
-  --datadir /freqtrade/user_data/data/binance/futures ^
-  --data-format json --exchange binance
-```
-
-### Verificar datos disponibles (Bear)
-
-```cmd
-docker run --rm -v "C:\CHACAL_ZERO_FRICTION\PROJECT_SNIPER_AWS\user_data:/freqtrade/user_data" ^
-  freqtradeorg/freqtrade:stable list-data ^
-  --config /freqtrade/user_data/configs/config_backtest.json ^
-  --datadir /freqtrade/user_data/data/binance/futures
-```
-
-### OOM Kill de emergencia (PC local)
-
-```cmd
-for /f "tokens=*" %i in ('docker ps -q') do docker kill %i
-```
-
-### Git Status completo
-
-```cmd
-git status && git log --oneline -10
+git status
+git log --oneline -10
 ```
 
 ---
@@ -342,6 +384,9 @@ git status && git log --oneline -10
 | 2026-04-03 | Volume | Validación multi-mercado 5 periodos | DD siempre <10% |
 | 2026-04-04 | Volume | Filtro BTC EMA50 1h implementado | Capital protegido en Bear |
 | 2026-04-05 | Bear | Autopsia Crash Agosto — bugs de ULTRA | Kill Switch 1m obligatorio |
+| 2026-04-06 | Bear | ULTRA v2.2 con Airbag 1m + RSI Lock | +15.5% Aug 2024, DD ~8% |
+| 2026-04-07 | Infra | Migración a WSL Nativo — Docker local abolido | Cero fricción de entorno |
+| 2026-04-07 | Infra | Makefile + bootstrap_wsl.sh portables | Setup reproducible en cualquier máquina |
 
 ---
 
@@ -349,27 +394,31 @@ git status && git log --oneline -10
 
 ### 🔴 CRÍTICO (hacer antes de lo demás)
 
-- [ ] **Git sync AWS ↔ Local**: Verificar qué commits tiene el server vs local. Mucho trabajo sin pushear.
-
+- [ ] **Validar Bear ULTRA en WSL**: Primer backtest limpio con entorno nativo en Agosto 2024
+  ```bash
+  # En WSL:
+  make doctor
+  make list-data-bear
+  make backtest-bear TIMERANGE=20240801-20240901
+  ```
+- [ ] **Kill Switch 1m**: Confirmar que está activo y funciona en el backtest
+- [ ] **Git sync AWS**: Verificar qué commits tiene el server
   ```cmd
   git log --oneline -10
-  ssh ... "cd /home/ec2-user/freqtrade && git log --oneline -5"
+  ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/freqtrade && git log --oneline -5"
   ```
-
-- [ ] **Kill Switch 1m en Bear ULTRA**: Re-activar RSI 1m para evitar trades zombie tipo BNB/ADA de agosto
-- [ ] **Validar Bear ULTRA con datos limpios de Agosto 2024** (con Kill Switch activo)
 
 ### 🟡 IMPORTANTE (esta semana)
 
-- [ ] **Stoploss por par revisado**: BNB (-4.8%) y ADA (-2.2%) fueron insuficientes en el crash
-- [ ] **Dry Run Volume Hunter**: Arrancar y monitorear primera semana real
 - [ ] **Validar Bear en Oct 2024 y Ene 2025** (otros periodos bear confirmados)
+- [ ] **Stoploss por par revisado**: BNB (-4.8%) y ADA (-2.2%) insuficientes en crash
+- [ ] **Dry Run Volume Hunter**: Arrancar cuando Bear esté validado
 
 ### 🟢 ROADMAP (próximas semanas)
 
-- [ ] **Estrategia LATERAL**: Crear `CHACAL_LATERAL\` con scalping de rango para BTC consolidando
-- [ ] **Switch Automático de Modos**: Script de detección de mercado que active el bot correcto
-- [ ] **Dashboard de Performance**: Telegram mejorado con resumen diario de ambos bots
+- [ ] **Estrategia LATERAL**: Crear `CHACAL_LATERAL\` para BTC consolidando
+- [ ] **Switch Automático de Modos**: Script que detecte mercado y active el bot correcto
+- [ ] **Dashboard Telegram**: Resumen diario de ambos bots
 - [ ] **Transición a Live**: Cuando Dry Run Bear tenga 30 días positivos consecutivos
 
 ---
@@ -380,19 +429,19 @@ Cuando se cree una nueva estrategia/proyecto dentro del ecosistema:
 
 ```
 1. Crear carpeta: C:\CHACAL_ZERO_FRICTION\NOMBRE_PROYECTO\
-2. Copiar estructura base:
-   ├── INSTRUCCIONES_CLINE_NOMBRE.md   ← Basarse en este formato
-   ├── docker-compose.yml
+2. Estructura base (SIN docker-compose local):
+   ├── INSTRUCCIONES_CLINE_NOMBRE.md
    └── user_data\
        ├── configs\
        │   ├── config_backtest.json
        │   └── config_live.json       ← Solo cuando sea necesario
-       ├── data\binance\futures\
+       ├── data\
        ├── hyperopt_results\
        └── logs\
-3. Agregar al mapa del ecosistema en este archivo (sección 🗺️)
-4. Agregar al CHACAL_MASTER_ESTADO.md
-5. Definir: mercado objetivo, entorno, estrategia, hardware
+3. Agregar al Makefile (targets bear/bull/etc)
+4. Agregar al mapa del ecosistema en este archivo
+5. Agregar al CHACAL_MASTER_ESTADO.md
+6. Definir: mercado objetivo, entorno, estrategia, hardware
 ```
 
 ---
@@ -403,18 +452,20 @@ Cuando se cree una nueva estrategia/proyecto dentro del ecosistema:
 
 | Fecha | Proyecto | Problema | Tiempo perdido | Solución aplicada |
 |-------|----------|----------|----------------|-------------------|
-| 2026-04-05 | Bear | Datos Agosto 2024 ausentes → 0 trades en backtest | ~2h | Verificar datos ANTES con list-data |
-| 2026-04-05 | Bear | Config en modo spot → shorts no funcionaban | ~1h | Limpiar contenedor y verificar trading_mode: futures |
+| 2026-04-05 | Bear | Datos Agosto 2024 ausentes → 0 trades en backtest | ~2h | Verificar datos ANTES con make list-data-bear |
+| 2026-04-05 | Bear | Config en modo spot → shorts no funcionaban | ~1h | Verificar trading_mode: futures en config |
 | 2026-04-05 | Bear | AttributeError .value en Epoch 7 ULTRA | ~30m | Quitar .value de parámetros ya constantes (L128) |
 | 2026-04-05 | Bear | Agent loop — repetir comandos sin verificar estado | ~1h | Regla: si falla 2 veces → PARAR y reportar |
 | 2026-04-02 | Volume | OOM Kill con 28 pares | ~1h | Fijar máx 8 pares + -j 1 en PC local |
 | 2026-04-02 | Volume | hyperopt.lock bloqueando reinicios | ~30m | Siempre borrar lock antes de relanzar |
+| 2026-04-06 | Bear | TripleMode: trailing_stop nativo pisando custom_stoploss | ~3h | Suspender TripleMode. Base Bear primero |
+| 2026-04-06-07 | Infra | Docker local en Windows: rutas rotas, OOM, volúmenes corruptos | ~1 semana | **Abolir Docker local. WSL nativo permanente** |
 
 ---
 
 ## 7. CONTEXTO DE INFRAESTRUCTURA
 
-### AWS (Sniper Bear)
+### AWS (Sniper Bear — Docker en Linux, ESTABLE)
 
 | Parámetro | Valor |
 |-----------|-------|
@@ -424,17 +475,17 @@ Cuando se cree una nueva estrategia/proyecto dentro del ecosistema:
 | Acceso | `skills\llave-sao-paulo.pem` |
 | Path Freqtrade | `/home/ec2-user/freqtrade` |
 | Container | `Chacal_Sniper_AWS_Env` |
-| Compose | `PROJECT_SNIPER_AWS\docker-compose.yml` |
 
-### PC Local (Volume Hunter)
+### PC Local (WSL / Linux Nativo — Docker PROHIBIDO)
 
 | Parámetro | Valor |
 |-----------|-------|
 | CPU | Intel i3-4170 (2C/4T) |
 | RAM | 10 GB usable |
-| OS | Windows |
-| Docker límite | `--memory 7g --cpus 2` |
-| Container | `chacal_volume_dryrun` |
+| Entorno | **WSL Ubuntu — Freqtrade nativo en venv** |
+| Centro de control | `make <comando>` desde WSL |
+| Root WSL | `~/chacal_zero_friction/` |
+| Guardrail | `-j 1` siempre, 8 pares máx |
 
 ### Git
 
@@ -442,13 +493,15 @@ Cuando se cree una nueva estrategia/proyecto dentro del ecosistema:
 |-----------|-------|
 | Remote | origin → GitHub |
 | Branch | master |
-| .gitignore | `user_data/configs/`, `skills/*.pem`, `user_data/data/` |
+| .gitignore | `user_data/configs/`, `skills/*.pem`, `user_data/data/`, `**/venv*/`, `node_modules/`, `*.log` |
 
 ---
 
 > ## ⚡ REGLA DE ORO PEGASO
 >
 > **"Antes de ejecutar, verificar. Antes de cerrar sesión, documentar. Antes de operar en live, backtestear."**
+>
+> **"Docker local = fricción. WSL nativo = velocidad. El Makefile es la verdad."**
 >
 > Este archivo es el cerebro del ecosistema CHACAL.
 > Cualquier agente (Antigravity, Cline, humano) que retome el trabajo DEBE leer este archivo primero.
