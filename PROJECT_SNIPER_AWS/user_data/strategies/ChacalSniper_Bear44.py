@@ -49,10 +49,15 @@ class ChacalSniper_Bear44(IStrategy):
 
     # --- space="sell" ---
     roi_base = DecimalParameter(0.01, 0.08, decimals=3, default=0.045, space="sell", optimize=True)
-    rsi_kill_switch = IntParameter(50, 85, default=70, space="sell", optimize=True)
+    
+    # Cascada RSI para el Airbag de 1m (Fino Multi-temporidad)
+    kill_rsi_1h = IntParameter(40, 70, default=55, space="sell", optimize=True)
+    kill_rsi_5m = IntParameter(50, 80, default=65, space="sell", optimize=True)
+    rsi_kill_switch = IntParameter(60, 90, default=75, space="sell", optimize=True) # RSI de 1m
 
     # --- space="stoploss" ---
-    bear_stoploss = DecimalParameter(-0.25, -0.01, decimals=3, default=-0.090, space="sell", optimize=True)
+    # Rango profundo (-6% a -15%) para forzar a Hyperopt a crear una red de seguridad, no una salida temprana.
+    bear_stoploss = DecimalParameter(-0.15, -0.06, decimals=3, default=-0.090, space="sell", optimize=True)
 
     # Trailing Stop
     trailing_stop = True
@@ -103,16 +108,16 @@ class ChacalSniper_Bear44(IStrategy):
         dataframe['bb_middleband'] = bollinger['mid']
         dataframe['price_change'] = (dataframe['close'] - dataframe['open']) / dataframe['open']
 
-        # --- MASTER BEAR SWITCH (BTC MACRO 1H) ---
         btc_1h = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1h")
         if not btc_1h.empty:
             # Resample para alinear 1h con 5m
+            btc_1h['btc_rsi_1h'] = ta.RSI(btc_1h, timeperiod=14)
             btc_1h['ema50'] = ta.EMA(btc_1h, timeperiod=50)
             btc_1h['atr'] = ta.ATR(btc_1h, timeperiod=14)
             btc_1h['atr_mean'] = btc_1h['atr'].rolling(8).mean()
             
             # Unimos los datos de BTC al dataframe principal
-            df_btc = btc_1h[['date', 'close', 'ema50', 'atr', 'atr_mean']].copy()
+            df_btc = btc_1h[['date', 'close', 'ema50', 'atr', 'atr_mean', 'btc_rsi_1h']].copy()
             df_btc = df_btc.rename(columns={
                 'close': 'btc_close',
                 'ema50': 'btc_ema50',
@@ -127,6 +132,13 @@ class ChacalSniper_Bear44(IStrategy):
             dataframe['master_bear_switch'] = (btc_trend_bear & btc_vol_active).astype(int)
         else:
             dataframe['master_bear_switch'] = 1 # Fail-safe
+            dataframe['btc_rsi_1h'] = 50
+
+        # DataFrame RSI BTC 5m para la Cascada
+        dataframe['btc_rsi_5m'] = dataframe['rsi'] # Como proxy usamos el rsi del par en 5m, o calculamos sobre btc
+        btc_5m = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="5m")
+        if not btc_5m.empty:
+             dataframe['btc_rsi_5m'] = ta.RSI(btc_5m, timeperiod=14)
 
         btc_1m = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1m")
         if btc_1m is not None and not btc_1m.empty:
@@ -192,19 +204,24 @@ class ChacalSniper_Bear44(IStrategy):
         if current_profit > -0.01:
             return None
 
-        # GUARDA 3: El RSI de 1m CRUZA al alza el umbral (rebote violento confirmado).
-        #           Solo el cruce importa, no que esté simplemente por encima.
+        # GUARDA 3: Cascada RSI (RSI Macro alcista -> RSI Medio alcista -> Cruce RSI 1m)
+        # Esto previene salidas por ruido de 1m en tendencias bajistas sanas.
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is not None and len(dataframe) > 1:
-            btc_rsi_1m_now  = float(dataframe.iloc[-1].get('btc_rsi_1m', np.nan))
+            last_candle = dataframe.iloc[-1]
+            btc_rsi_1m_now  = float(last_candle.get('btc_rsi_1m', np.nan))
             btc_rsi_1m_prev = float(dataframe.iloc[-2].get('btc_rsi_1m', np.nan))
+            btc_rsi_5m_now  = float(last_candle.get('btc_rsi_5m', np.nan))
+            btc_rsi_1h_now  = float(last_candle.get('btc_rsi_1h', np.nan))
 
-            if (
-                pd.notna(btc_rsi_1m_now)
-                and pd.notna(btc_rsi_1m_prev)
-                and btc_rsi_1m_prev <= self.rsi_kill_switch.value
-                and btc_rsi_1m_now  >  self.rsi_kill_switch.value
-            ):
-                return "airbag_1m_rebote_violento"
+            if pd.notna(btc_rsi_1m_now) and pd.notna(btc_rsi_1m_prev) and pd.notna(btc_rsi_5m_now) and pd.notna(btc_rsi_1h_now):
+                # Evaluación en Cascada
+                macro_bull = btc_rsi_1h_now > self.kill_rsi_1h.value
+                micro_bull = btc_rsi_5m_now > self.kill_rsi_5m.value
+                cruce_1m_violento = (btc_rsi_1m_prev <= self.rsi_kill_switch.value) and (btc_rsi_1m_now > self.rsi_kill_switch.value)
+
+                # Si el rebote se sincroniza en todas las temporalidades (peligro extremo)
+                if macro_bull and micro_bull and cruce_1m_violento:
+                    return "airbag_cascada_rebote_violento"
 
         return None

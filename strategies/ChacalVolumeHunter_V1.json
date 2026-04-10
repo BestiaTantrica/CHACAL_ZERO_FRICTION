@@ -1,15 +1,8 @@
 {
   "strategy_name": "ChacalVolumeHunter_V1",
   "params": {
-    "roi": {},
     "stoploss": {
       "stoploss": -0.99
-    },
-    "trailing": {
-      "trailing_stop": true,
-      "trailing_stop_positive": 0.302,
-      "trailing_stop_positive_offset": 0.391,
-      "trailing_only_offset_is_reached": true
     },
     "max_open_trades": {
       "max_open_trades": 8

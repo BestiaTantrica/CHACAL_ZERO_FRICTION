@@ -69,6 +69,7 @@ class ChacalVolumeHunter_V1(IStrategy):
             btc_1h['btc_delta'] = btc_1h['close'].pct_change(fill_method=None)
             dataframe = pd.merge(dataframe, btc_1h[['date', 'btc_rsi_1h', 'btc_ema_50_1h', 'btc_delta']], on='date', how='left')
         
+        # Corrección: fillna y comprobación de columnas
         dataframe.fillna({'btc_rsi_1h': 50, 'btc_delta': 0, 'btc_rsi': 50, 'btc_std': 0.002}, inplace=True)
         if 'btc_ema_50_1h' not in dataframe.columns:
              dataframe['btc_ema_50_1h'] = dataframe['close'] * 1.5
@@ -140,7 +141,7 @@ class ChacalVolumeHunter_V1(IStrategy):
         return None
 
     def leverage(self, pair, current_time, current_rate, proposed_leverage, max_leverage, entry_tag, side, **kwargs) -> float:
-         return 5.0
+        return 5.0
 
     def custom_stoploss(self, pair, trade, current_time, current_rate, current_profit, **kwargs):
         if current_profit > self.trailing_stop_positive_offset:

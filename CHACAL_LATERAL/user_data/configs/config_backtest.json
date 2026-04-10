@@ -1,0 +1,56 @@
+{
+    "bot_name": "CHACAL-LATERAL-TERMOMETRO",
+    "initial_state": "running",
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "tradable_balance_ratio": 0.85,
+    "max_open_trades": 8,
+    "timeframe": "5m",
+    "dry_run": true,
+    "exchange": {
+        "name": "binance",
+        "ccxt_config": {
+            "options": {
+                "defaultType": "swap"
+            }
+        },
+        "pair_whitelist": [
+            "BTC/USDT:USDT",
+            "ETH/USDT:USDT",
+            "SOL/USDT:USDT",
+            "BNB/USDT:USDT",
+            "XRP/USDT:USDT",
+            "AVAX/USDT:USDT",
+            "LINK/USDT:USDT",
+            "DOGE/USDT:USDT"
+        ]
+    },
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 30
+    },
+    "stoploss": -0.10,
+    "trailing_stop": false,
+    "telegram": {
+        "enabled": true,
+        "token": "8760247299:AAHNhw7k-YlEG2kL7lO0Ze5cbuRzg7y8bW4",
+        "chat_id": "6527908321"
+    }
+}
