@@ -3,6 +3,7 @@
 Esta guía contiene los procedimientos para monitorear y auditar el Fondo Trifásico Chacal en la instancia de AWS São Paulo.
 
 ## 🛰️ CONEXIÓN RÁPIDA
+
 ```bash
 ssh -i skills/llave-sao-paulo.pem ubuntu@54.94.193.76
 ```
@@ -10,6 +11,7 @@ ssh -i skills/llave-sao-paulo.pem ubuntu@54.94.193.76
 ---
 
 ## 🚦 MONITOREO DE SERVICIOS
+
 El sistema usa `systemd`. Puedes gestionar los procesos con estos comandos:
 
 | Servicio | Función | Comando de Estado |
@@ -22,6 +24,7 @@ El sistema usa `systemd`. Puedes gestionar los procesos con estos comandos:
 ---
 
 ## 🪵 GESTIÓN DE LOGS (AUDITORÍA)
+
 Usa `journalctl` para ver qué está pasando en tiempo real:
 
 - **Efecto Matrix (Ver todo en vivo):**
