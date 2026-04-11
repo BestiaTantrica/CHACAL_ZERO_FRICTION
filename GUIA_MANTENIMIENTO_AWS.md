@@ -27,20 +27,20 @@ El sistema usa `systemd`. Puedes gestionar los procesos con estos comandos:
 
 Usa `journalctl` para ver qué está pasando en tiempo real:
 
-- **Efecto Matrix (Ver todo en vivo):**
+* **Efecto Matrix (Ver todo en vivo):**
   `journalctl -u ft-lateral -u ft-bear -u ft-bull -u chacal-control -f`
-- **Ver solo el cambio de régimen:**
+* **Ver solo el cambio de régimen:**
   `journalctl -u chacal-control -f`
-- **Buscar errores críticos:**
+* **Buscar errores críticos:**
   `journalctl -p 3 -xb`
 
 ---
 
 ## 🧠 SALUD DEL SERVIDOR (RECURSOS)
 
-- **RAM y Swap:** `free -h`
-- **Carga de CPU:** `htop` (o `top`)
-- **Espacio en Disco:** `df -h`
+* **RAM y Swap:** `free -h`
+* **Carga de CPU:** `htop` (o `top`)
+* **Espacio en Disco:** `df -h`
 
 ---
 
@@ -58,9 +58,9 @@ Si ves que hay dos bots encendidos al mismo tiempo, reinicia el cerebro:
 
 ## 🏁 CONTINGENCIAS
 
-- **El bot no responde en Telegram:** Reinicia el servicio activo (ej. `sudo systemctl restart ft-lateral`).
-- **El servidor se reinicia:** No hagas nada. Los servicios están en `enabled` y arrancarán solos.
-- **Cambio de API Keys:** Edita `/home/ubuntu/chacal/user_data/configs/config.json` y reinicia el bot activo.
+* **El bot no responde en Telegram:** Reinicia el servicio activo (ej. `sudo systemctl restart ft-lateral`).
+* **El servidor se reinicia:** No hagas nada. Los servicios están en `enabled` y arrancarán solos.
+* **Cambio de API Keys:** Edita `/home/ubuntu/chacal/user_data/configs/config.json` y reinicia el bot activo.
 
 ---
 
