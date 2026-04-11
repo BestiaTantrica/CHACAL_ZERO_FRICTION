@@ -1,0 +1,11 @@
+{
+    "stake_currency": "USDT",
+    "exchange": {
+        "name": "binance",
+        "ccxt_config": {
+            "options": {
+                "defaultType": "swap"
+            }
+        }
+    }
+}

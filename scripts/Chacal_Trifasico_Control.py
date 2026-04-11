@@ -2,9 +2,10 @@ import pandas as pd
 import numpy as np
 import time
 import os
+import subprocess
 
-# CONFIGURACIÓN TRIFÁSICA (Sincronizada con DNA 62 y Sniper ULTRA)
-LATERAL_THRESHOLD = 0.039  # 3.9% de desviación de EMA50
+# CONFIGURACIÓN ELITE V4.0 (The Sniper King)
+LATERAL_THRESHOLD = 0.043  # 4.3% de desviación de EMA50
 EMA_PERIOD = 50
 TIMEFRAME = '1h'
 
@@ -54,13 +55,35 @@ class ChacalTrifasicoControl:
         }
         return report
 
+    def switch_regime(self, new_regime):
+        """
+        Ejecuta la conmutación activa de servicios systemd para evitar colisiones
+        """
+        if new_regime == self.current_regime:
+            return
+
+        print(f"🔄 CAMBIO DE RÉGIMEN DETECTADO: {self.current_regime} -> {new_regime}")
+        
+        # Mapeo de regímenes a servicios
+        # Sniper Bear domina Lateral y Bear
+        if new_regime in ["MODO_LATERAL", "MODO_BEAR"]:
+            print("🚀 Activando Especialista Francotirador: SNIPER BEAR")
+            subprocess.run(["sudo", "systemctl", "stop", "ft-bull"], check=False)
+            subprocess.run(["sudo", "systemctl", "start", "ft-bear"], check=False)
+        
+        elif new_regime == "MODO_BULL":
+            print("🚀 Activando Especialista de Euforia: VOLUME HUNTER")
+            subprocess.run(["sudo", "systemctl", "stop", "ft-bear"], check=False)
+            subprocess.run(["sudo", "systemctl", "start", "ft-bull"], check=False)
+            
+        self.current_regime = new_regime
+
     def get_active_specialist(self, regime):
-        mapping = {
-            "MODO_LATERAL": "🔮 Lateral Hunter V4",
-            "MODO_BULL": "🦊 Volume Hunter",
-            "MODO_BEAR": "🦅 Sniper Bear ULTRA"
-        }
-        return mapping.get(regime, "NUNCA_OPERAR")
+        if regime in ["MODO_LATERAL", "MODO_BEAR"]:
+            return "🦅 Sniper Bear ULTRA (7x)"
+        elif regime == "MODO_BULL":
+            return "🦊 Volume Hunter (10x Sniper)"
+        return "NUNCA_OPERAR"
 
 if __name__ == "__main__":
     print("--- CHACAL ZERO FRICTION: CONTROL TRIFÁSICO ---")
