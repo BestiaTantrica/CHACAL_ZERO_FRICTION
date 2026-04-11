@@ -3,11 +3,18 @@ import numpy as np
 import time
 import os
 import subprocess
+import requests
 
 # CONFIGURACIÓN ELITE V4.0 (The Sniper King)
-LATERAL_THRESHOLD = 0.043  # 4.3% de desviación de EMA50
+LATERAL_THRESHOLD = 0.043
 EMA_PERIOD = 50
 TIMEFRAME = '1h'
+BTC_SYMB = 'BTC/USDT:USDT'
+
+# CONFIGURACIÓN TELEGRAM (Sincronizada con el bot)
+# Estos campos se llenarán con los datos de tu config.json en AWS
+TELEGRAM_TOKEN = "" # Se rellena en AWS
+TELEGRAM_CHAT_ID = "" 
 
 class ChacalTrifasicoControl:
     def __init__(self, btc_data_path):
@@ -55,6 +62,16 @@ class ChacalTrifasicoControl:
         }
         return report
 
+    def send_telegram(self, message):
+        """Envía notificaciones al Telegram del Capitán"""
+        if not TELEGRAM_TOKEN: return
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        payload = {"chat_id": TELEGRAM_CHAT_ID, "text": f"🦅 [CEREBRO CHACAL]: {message}"}
+        try:
+            requests.post(url, json=payload, timeout=10)
+        except:
+            pass
+
     def switch_regime(self, new_regime):
         """
         Ejecuta la conmutación activa de servicios systemd para evitar colisiones
@@ -62,19 +79,19 @@ class ChacalTrifasicoControl:
         if new_regime == self.current_regime:
             return
 
-        print(f"🔄 CAMBIO DE RÉGIMEN DETECTADO: {self.current_regime} -> {new_regime}")
+        msg = f"🔄 CAMBIO DE RÉGIMEN: {self.current_regime} -> {new_regime}"
+        print(msg)
+        self.send_telegram(msg)
         
-        # Mapeo de regímenes a servicios
-        # Sniper Bear domina Lateral y Bear
         if new_regime in ["MODO_LATERAL", "MODO_BEAR"]:
-            print("🚀 Activando Especialista Francotirador: SNIPER BEAR")
             subprocess.run(["sudo", "systemctl", "stop", "ft-bull"], check=False)
             subprocess.run(["sudo", "systemctl", "start", "ft-bear"], check=False)
+            self.send_telegram("🦅 SNIPER BEAR ACTIVADO (7x)")
         
         elif new_regime == "MODO_BULL":
-            print("🚀 Activando Especialista de Euforia: VOLUME HUNTER")
             subprocess.run(["sudo", "systemctl", "stop", "ft-bear"], check=False)
             subprocess.run(["sudo", "systemctl", "start", "ft-bull"], check=False)
+            self.send_telegram("🦊 VOLUME HUNTER ACTIVADO (10x Sniper)")
             
         self.current_regime = new_regime
 
@@ -86,17 +103,36 @@ class ChacalTrifasicoControl:
         return "NUNCA_OPERAR"
 
 if __name__ == "__main__":
-    print("--- CHACAL ZERO FRICTION: CONTROL TRIFÁSICO ---")
-    # Mock para demostración del concepto
-    # En producción: esto leería de la API de Binance o del archivo de datos de Freqtrade
-    data = {
-        'close': [62000, 61500, 61000, 60500, 59000, 58000, 57000, 56000] # Ejemplo dump Junio
-    }
-    df_example = pd.DataFrame(data)
+    print("--- CHACAL ZERO FRICTION: CONTROL ELITE V4.0 ---")
     
+    # En producción este script corre dentro de la carpeta /home/ubuntu/chacal
+    # Intentamos leer el config para Telegram si existe
+    try:
+        import json
+        with open('/home/ubuntu/freqtrade/user_data/configs/config.json') as f:
+            cfg = json.load(f)
+            TELEGRAM_TOKEN = cfg['telegram']['token']
+            TELEGRAM_CHAT_ID = cfg['telegram']['chat_id']
+    except:
+        pass
+
     control = ChacalTrifasicoControl(None)
-    status = control.get_status_report(df_example)
     
-    print(f"Régimen Detectado: {status['regime']}")
-    print(f"Especialista Activo: {status['specialist']}")
-    print(f"Desviación EMA50: {status['diff_ema_pct']}%")
+    while True:
+        try:
+            # En producción esto lee de la DB o API de Binance
+            # Usaremos el comando freqtrade list-data o similar para obtener precio fresco
+            # Simplificamos: el orquestador lee los últimos logs o usa ccxt
+            import ccxt
+            exchange = ccxt.binance()
+            ohlcv = exchange.fetch_ohlcv('BTC/USDT', timeframe='1h', limit=100)
+            df = pd.DataFrame(ohlcv, columns=['timestamp', 'open', 'high', 'low', 'close', 'volume'])
+            
+            status = control.get_status_report(df)
+            print(f"[{time.ctime()}] Regime: {status['regime']} | BTC: {status['btc_price']}")
+            
+            control.switch_regime(status['regime'])
+        except Exception as e:
+            print(f"Error en bucle: {e}")
+            
+        time.sleep(60)
