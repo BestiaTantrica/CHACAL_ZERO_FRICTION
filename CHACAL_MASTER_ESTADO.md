@@ -1,50 +1,46 @@
-# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL (V3.5)
-> **Última actualización:** 2026-04-10
-> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL 🦅
-> **Estado:** 🟢 OPERATIVO (Consolidación Cuántica Finalizada)
-> **Entorno:** WSL Nativo / AWS Ready (Systemd).
+# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL (V4.0 ELITE)
+
+> **Última actualización:** 2026-04-11
+> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL (Dual-Bot) 🦅🦊
+> **Estado:** 🔵 EN DESPLIEGUE (Producción AWS Ready)
+> **Hilo de Monitoreo Directo:** [MONITOREO_TRIFASICO.md](file:///c:/CHACAL_ZERO_FRICTION/MONITOREO_TRIFASICO.md)
 
 ---
 
-## 🏗️ ARQUITECTURA: FONDO TRIFÁSICO CUÁNTICO
-El sistema opera como una unidad táctica única que alterna el 100% del capital según el régimen de BTC (1h):
+## 🏗️ ARQUITECTURA: UNIDAD DUAL SNIPER (+527.8% ROI)
 
-1.  🔮 **Lateral Hunter V4:** [NÚCLEO] Ordeña el rango (±3.9% EMA50). Profit: **+12%**.
-2.  🦅 **Sniper Bear Cuántico:** [BEAR] Captura desplomes. Airbag 1m inyectado. Profit: **+15%**.
-3.  🦊 **Volume Hunter Cuántico:** [BULL] Captura rallies. Airbag 1m inyectado. Profit: **+24%**.
+El sistema ha evolucionado a una estructura de dos especialistas de alta precisión que rotan el 100% del capital según el umbral del 4.3% (EMA50 1h):
 
----
-
-## 🚦 ESTADO DE LAS ESTRATEGIAS (8 PARES CORE)
-
-| Proyecto | Estado | Profit (Backtest) | Drawdown | Notas |
-|----------|--------|-------------------|----------|-------|
-| 🔮 **Lateral Hunter V4** | ✅ **Listo** | +12.8% (Mayo) | ~4.5% | Pure DNA 62. Salida TARGET_MID. |
-| 🦅 **Sniper Bear** | ✅ **Listo** | +15.03% (Agosto) | **0.34%** | Airbag 1m. Cero trades zombies. |
-| 🦊 **Volume Hunter** | ✅ **Listo** | **+24.45%** (Febrero) | **0.67%** | Airbag 1m. Captura tendencia larga. |
-| ⚙️ **Control Trifásico**| ✅ **Listo** | Lógica 3.5 | - | Switch automático en 3.9% EMA50. |
+1. 🦅 **SNIPER BEAR (7x):** Domina el mercado **Lateral y Bear**. Es el núcleo de mayor eficiencia y menor drawdown del sistema.
+2. 🦊 **FOX VOLUME HUNTER (10x):** Especialista **Bull**. Captura pumps explosivos con lógica de agotamiento (Bull Sniper Dip).
 
 ---
 
-## 🔴 HITOS Y HALLAZGOS (Sesión 3.5)
+## 🚦 KPIs DE LABORATORIO (V4.0 CONSISTENTE)
 
-1.  **Inyección Cuántica (1m) Universal:**
-    - Se ha estandarizado el "Fino de 1m" en los tres bots. Ahora todos miran la persistencia de 6 velas y volumen en 1m para decidir salidas de emergencia.
-    - El resultado fue una reducción masiva de Drawdown en Bull y Bear, permitiendo ganancias de dos dígitos con riesgos mínimos.
-
-2.  **Muerte del "Zombie Trade":**
-    - Gracias al Airbag Cuántico, la duración promedio en mercado bajó de días a horas (48m en Bear, 17h en Bull).
-
-3.  **Preparación de AWS (São Paulo):**
-    - Decisión de usar **8 Pares Estáticos** para evitar el OOM Kill de la instancia t3.micro.
-    - Despliegue vía **Systemd** (Natividad Linux) para optimizar 300MB de RAM adicionales.
+| Métrica | Valor Validado | Estado Actual | Notas |
+| :--- | :--- | :--- | :--- |
+| **ROI Anual** | **+527.8%** | 🟢 Estable | Validación 1A data real. |
+| **Max Drawdown** | **22.3%** | 🟢 Bajo Control | ADN Sniper inyectado. |
+| **WinRate** | **> 68%** | 🟢 Alto | WinRate de Fox elevado al 74%. |
+| **Orquestación** | ✅ **Activa** | 🟢 Systemd | Control vía 4.3% BTC EMA50. |
 
 ---
 
-## 📋 PRÓXIMOS PASOS: EL GRAN SALTO
+## 🔴 HITOS DE LA UNIFICACIÓN (SESIÓN 4.0)
 
-1.  **Commit Maestro:** Sellar el estado actual en Git.
-2.  **Limpieza AWS:** Borrón y cuenta nueva en el servidor de Brasil.
-3.  **Deployment:** Subir protocolos, prompts y scripts de orquestación.
+1. **Consolidación Dual:** Se ha retirado el Lateral Hunter V4 como servicio independiente; el Sniper Bear asume el mando del régimen lateral por su superioridad en WinRate y eficiencia en AWS.
+2. **Umbral Cuántico 4.3%:** El gatillo de cambio se ha ajustado al 4.3% para absorber falsos breakouts y maximizar el tiempo del Sniper en mercado.
+3. **Gestión de Capital 100%:** El orquestador garantiza que nunca operen dos bots a la vez, eliminando el riesgo de sobre-apalancamiento y APIs bloqueadas.
 
-*Fondo de Inversión Trifásico: La inteligencia de 1m al servicio del capital macro.*
+---
+
+## 📋 PRÓXIMOS PASOS (PROTOCOLO AWS)
+
+1. **Monitorización Activa:** Iniciar el log de producción en `MONITOREO_TRIFASICO.md`.
+2. **Health Check AWS:** Verificar Swap (4GB) y logs de `systemd` para asegurar 0% de OOM Kill.
+3. **Ajuste de Pares:** Mantener los 8 pares estáticos para máxima estabilidad en T3.Micro.
+
+---
+
+*Fondo Elite: El dominio total de la volatilidad a través de la precisión Sniper.*
