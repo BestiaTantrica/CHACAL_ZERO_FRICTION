@@ -1,0 +1,56 @@
+{
+    "bot_name": "FONDO-TRIFASICO-FICT",
+    "db_url": "sqlite:///user_data/trifasico.sqlite",
+    "initial_state": "running",
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "tradable_balance_ratio": 0.95,
+    "fiat_display_currency": "USD",
+    "dry_run": true,
+    "max_open_trades": 8,
+    "timeframe": "5m",
+    "exchange": {
+        "name": "binance",
+        "ccxt_config": {
+            "options": {
+                "defaultType": "swap"
+            }
+        },
+        "pair_whitelist": [
+            "BTC/USDT:USDT",
+            "ETH/USDT:USDT",
+            "SOL/USDT:USDT",
+            "BNB/USDT:USDT",
+            "XRP/USDT:USDT",
+            "AVAX/USDT:USDT",
+            "LINK/USDT:USDT",
+            "DOGE/USDT:USDT"
+        ]
+    },
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1,
+        "check_depth_of_market": {
+            "enabled": false,
+            "bids_to_ask_delta": 1
+        }
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "telegram": {
+        "enabled": true,
+        "token": "7998240806:AAHDUkFw6quDuoFB_fs5Altv8g9M_zP9-XU",
+        "chat_id": "6527908321"
+    }
+}

@@ -9,7 +9,7 @@
 
 | Bot | Proyecto | Entorno | Estrategia | Modo | Maestro |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Sniper Bear** | `PROJECT_SNIPER_AWS/` | AWS `15.229.158.221` (servidor) | `ChacalSniper_Bear44` | SHORT (Bear) | `PROJECT_SNIPER_AWS/INSTRUCCIONES_CLINE_BEAR.md` |
+| **Sniper Bear** | `PROJECT_SNIPER_AWS/` | AWS `54.94.193.76` (servidor) | `ChacalSniper_Bear44` | SHORT (Bear) | `PROJECT_SNIPER_AWS/INSTRUCCIONES_CLINE_BEAR.md` |
 | **Volume Hunter** | `CHACAL_VOLUME_HUNTER/` | **PC Local** (tu máquina) | `ChacalVolumeHunter_V1` | LONG (Bull/Lateral) | `CHACAL_VOLUME_HUNTER/INSTRUCCIONES_CLINE_VOLUME.md` |
 
 ---
@@ -44,8 +44,8 @@ CHACAL_ZERO_FRICTION/
 
 | Parámetro | Valor |
 | :--- | :--- |
-| IP | `15.229.158.221` |
-| Usuario | `ec2-user` |
+| IP | `54.94.193.76` |
+| Usuario | `ubuntu` |
 | Llave SSH | `skills/llave-sao-paulo.pem` |
 | Path Freqtrade | `/home/ec2-user/freqtrade` |
 
@@ -58,7 +58,7 @@ git commit -m "descripción"
 git push origin master
 
 # 2. Pull + restart en server
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 \
+ssh -i skills\llave-sao-paulo.pem ubuntu@54.94.193.76 \
   "cd /home/ec2-user/freqtrade && git pull origin master && docker-compose down && docker-compose up -d"
 ```
 

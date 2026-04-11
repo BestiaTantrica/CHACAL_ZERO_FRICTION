@@ -1,0 +1,14 @@
+[Unit]
+Description=Freqtrade Lateral Specialist
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/chacal
+ExecStart=/home/ubuntu/chacal/.venv/bin/freqtrade trade --config /home/ubuntu/chacal/user_data/configs/config.json --strategy ChacalLateral_V4 --strategy-path /home/ubuntu/chacal/strategies
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,14 @@
+[Unit]
+Description=Chacal Trifasico Orchestrator
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/chacal
+ExecStart=/home/ubuntu/chacal/.venv/bin/python3 /home/ubuntu/chacal/scripts/chacal_orchestrator.py
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
