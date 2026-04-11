@@ -37,6 +37,7 @@ Usa `journalctl` para ver qué está pasando en tiempo real:
 ---
 
 ## 🧠 SALUD DEL SERVIDOR (RECURSOS)
+
 - **RAM y Swap:** `free -h`
 - **Carga de CPU:** `htop` (o `top`)
 - **Espacio en Disco:** `df -h`
@@ -44,7 +45,9 @@ Usa `journalctl` para ver qué está pasando en tiempo real:
 ---
 
 ## 🛡️ PROTOCOLO DE CONCURRENCIA
+
 **REGLA DE ORO:** Solo DEBEN estar activos dos servicios:
+
 1. `chacal-control.service` (Siempre)
 2. **UNO** de los tres bots (`ft-lateral`, `ft-bear` o `ft-bull`).
 
@@ -54,9 +57,11 @@ Si ves que hay dos bots encendidos al mismo tiempo, reinicia el cerebro:
 ---
 
 ## 🏁 CONTINGENCIAS
+
 - **El bot no responde en Telegram:** Reinicia el servicio activo (ej. `sudo systemctl restart ft-lateral`).
 - **El servidor se reinicia:** No hagas nada. Los servicios están en `enabled` y arrancarán solos.
 - **Cambio de API Keys:** Edita `/home/ubuntu/chacal/user_data/configs/config.json` y reinicia el bot activo.
 
 ---
+
 *Fondo Trifásico: Resiliencia Blindada.*
