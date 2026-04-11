@@ -16,7 +16,7 @@ El sistema usa `systemd`. Puedes gestionar los procesos con estos comandos:
 
 | Servicio | Función | Comando de Estado |
 | :--- | :--- | :--- |
-| **Orquestador** | Cerebro (Cambio 3.9%) | `systemctl status chacal-control` |
+| **Orquestador** | Cerebro (Cambio 4.3%) | `systemctl status chacal-control` |
 | **Lateral Bot** | Especialista Rango | `systemctl status ft-lateral` |
 | **Bear Bot** | Especialista Dumps | `systemctl status ft-bear` |
 | **Bull Bot** | Especialista Pumps | `systemctl status ft-bull` |

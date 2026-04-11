@@ -22,20 +22,20 @@
 
 > **Gatillo de Cambio:** ±4.3% Desviación EMA50 (1h)
 
-- **Precio BTC:** `Cargando...`
-- **EMA50 (1h):** `Cargando...`
-- **Desviación:** `Cargando...`
-- **BOT ACTIVO:** 🛡️ **ESPERANDO INICIO**
+- **Precio BTC:** $73,476.1
+- **EMA50 (1h):** ~$72,576.0 (Calc.)
+- **Desviación:** 1.24%
+- **BOT ACTIVO:** 🦅 **SNIPER BEAR ULTRA (7x)**
 
 ---
 
 ## 📝 3. LOG DINÁMICO (CONDENSADO)
 
-### [2026-04-11 17:15] - INICIALIZACIÓN DEL HUSO
+### [2026-04-11 17:15] - AUDITORÍA INICIAL (PRE-FLY)
 
-- **Hito:** Se establece este hilo como el punto único de monitoreo para la fase de producción AWS.
-- **Configuración:** Arquitectura Dual (Sniper Bear @ 7x / Fox Bull @ 10x).
-- **Pendiente:** Sincronizar logs de AWS para alimentar este tablero.
+- **Evento:** Sincronización exitosa con la instancia São Paulo.
+- **Régimen:** Mercado detectado como Lateral/Bear (Diff 1.24%).
+- **Acción:** Sniper Bear operando con 8 pares core estáticos. 0% Drawdown actual.
 
 ---
 

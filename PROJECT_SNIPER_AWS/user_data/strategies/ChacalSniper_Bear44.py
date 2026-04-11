@@ -23,7 +23,10 @@ class ChacalSniper_Bear44(IStrategy):
     can_short: bool = True
 
     def informative_pairs(self):
-        return [("BTC/USDT:USDT", "1h"), ("BTC/USDT:USDT", "1m")]
+        pairs = self.dp.current_whitelist()
+        informative = [(pair, "1m") for pair in pairs]
+        informative += [("BTC/USDT:USDT", "1h"), ("BTC/USDT:USDT", "5m"), ("BTC/USDT:USDT", "1m")]
+        return informative
 
     hyperopt_dna = {
         "BTC/USDT:USDT":   {"v_factor": 4.660, "pulse_change": 0.004, "bear_roi": 0.022, "bear_sl": -0.031},
