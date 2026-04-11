@@ -20,8 +20,8 @@ class ChacalVolumeHunter_V1(IStrategy):
     use_custom_exit = True
     use_custom_stoploss = True
     trailing_stop = True
-    trailing_stop_positive = 0.015
-    trailing_stop_positive_offset = 0.04
+    trailing_stop_positive = 0.03
+    trailing_stop_positive_offset = 0.07
     trailing_only_offset_is_reached = True
     minimal_roi = {'0': 0.50}
     stoploss = -0.99
@@ -31,10 +31,10 @@ class ChacalVolumeHunter_V1(IStrategy):
     fomo_rsi_max = IntParameter(65, 85, default=68, space='buy', load=True)   # Techo de entrada FOMO
     
     # --- Parámetros Buy (Optimizado Epoch 116) ---
-    btc_threshold_mult = DecimalParameter(0.8, 2.5, default=1.931, space='buy', load=True)
-    rsi_buy_min = IntParameter(15, 60, default=49, space='buy', load=True)
-    w_corr  = DecimalParameter(0.3, 0.6, default=0.483, space='buy', load=True)
-    w_atr   = DecimalParameter(0.1, 0.4, default=0.119, space='buy', load=True)
+    btc_threshold_mult = DecimalParameter(0.8, 2.5, default=0.869, space='buy', load=True)
+    rsi_buy_min = IntParameter(15, 60, default=31, space='buy', load=True)
+    w_corr  = DecimalParameter(0.3, 0.6, default=0.575, space='buy', load=True)
+    w_atr   = DecimalParameter(0.1, 0.4, default=0.308, space='buy', load=True)
 
     # --- Parámetros Sell/Exit ---
     exit_rsi_level = IntParameter(60, 95, default=92, space='sell', load=True)
@@ -45,7 +45,11 @@ class ChacalVolumeHunter_V1(IStrategy):
     max_open_trades = 8
 
     def informative_pairs(self):
-        return [('BTC/USDT:USDT', self.inf_timeframe), ('BTC/USDT:USDT', self.timeframe)]
+        return [
+            ('BTC/USDT:USDT', self.inf_timeframe), 
+            ('BTC/USDT:USDT', self.timeframe),
+            ('BTC/USDT:USDT', '1m')
+        ]
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dataframe['atr'] = ta.ATR(dataframe, timeperiod=14)
@@ -76,6 +80,24 @@ class ChacalVolumeHunter_V1(IStrategy):
         
         if 'close_btc' not in dataframe.columns: dataframe['close_btc'] = dataframe['close']
             
+        # --- MICRO 1m (Gatillo de Seguridad Cuántico del Par) ---
+        inf_1m = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe='1m').copy()
+        if not inf_1m.empty:
+            inf_1m['ema_slow_1m'] = ta.EMA(inf_1m, timeperiod=50)
+            inf_1m['vol_mean_1m'] = inf_1m['volume'].rolling(10).mean()
+            # Si el PAR rompe a la baja su EMA de 1m con volumen (Agotamiento real)
+            # RELAJADO: 6 velas de persistencia para ignorar shakeouts rápidos (antes 3)
+            inf_1m['airbag_long_trigger'] = ((inf_1m['close'] < inf_1m['ema_slow_1m']) & (inf_1m['volume'] > inf_1m['vol_mean_1m'])).rolling(6).min()
+            
+            dataframe = pd.merge_asof(
+                dataframe.sort_values('date'),
+                inf_1m[['date', 'airbag_long_trigger']].sort_values('date'),
+                on='date',
+                direction='backward'
+            )
+        else:
+            dataframe['airbag_long_trigger'] = 0
+            
         dataframe['atraso'] = dataframe['close_btc'].pct_change(5, fill_method=None) - dataframe['close'].pct_change(5, fill_method=None)
         
         # FILTRO MACRO IMPLACABLE
@@ -90,7 +112,7 @@ class ChacalVolumeHunter_V1(IStrategy):
             dataframe['is_macro_bull'] & 
             (dataframe['btc_delta'] > -0.01) & 
             (dataframe['atraso'] > (dataframe['btc_std'] * self.btc_threshold_mult.value)) & 
-            (dataframe['volume'] > (dataframe['volume_mean'] * 2.0)) & 
+            (dataframe['volume'] > (dataframe['volume_mean'] * 1.2)) & 
             (dataframe['rsi'] > self.rsi_buy_min.value) &
             (dataframe['btc_rsi_1h'] <= self.macro_rsi_bull.value) 
         )
@@ -122,10 +144,10 @@ class ChacalVolumeHunter_V1(IStrategy):
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         last_candle = dataframe.iloc[-1].squeeze()
 
-        # ROTACIÓN DE CAPITAL
-        if current_profit > 0.05:
-            if last_candle['close'] < last_candle['ema_13']:
-                return 'TECHNICAL_ROTATION'
+        # ROTACIÓN DE CAPITAL (DESACTIVADA PARA BULL AGRESIVO)
+        # if current_profit > 0.05:
+        #     if last_candle['close'] < last_candle['ema_13']:
+        #         return 'TECHNICAL_ROTATION'
                 
         # --- ZOMBIE & DUMP KILL SWITCHES ---
         time_opened_h = (current_time - trade.open_date_utc).total_seconds() / 3600
@@ -134,6 +156,11 @@ class ChacalVolumeHunter_V1(IStrategy):
         if time_opened_h > 48.0 and current_profit < -0.05:
             return 'ZOMBIE_48H_LOSS'
             
+        # 3. QUANTUM AIRBAG (1m): Si EL PAR rompe su estructura micro
+        # RELAJADO: Solo si la pérdida es real (-4%) para dar aire al trade (antes -1%)
+        if last_candle.get('airbag_long_trigger', 0) == 1 and current_profit < -0.04:
+            return 'QUANTUM_AIRBAG_DUMP'
+
         # 2. PANIC DUMP AIRBAG (Reducido a -25% apalancado)
         if current_profit < -0.25:
             return 'PANIC_DUMP_LOSS'

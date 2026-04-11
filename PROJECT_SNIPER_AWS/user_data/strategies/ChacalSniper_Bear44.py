@@ -153,6 +153,41 @@ class ChacalSniper_Bear44(IStrategy):
             )
         else:
             dataframe['btc_rsi_1m'] = np.nan
+        
+        # --- MICRO / MIRA INSTITUCIONAL (1m) del Par Activo ---
+        inf_1m = self.dp.get_pair_dataframe(pair=metadata['pair'], timeframe="1m")
+        
+        if inf_1m is not None and not inf_1m.empty:
+            inf_1m = inf_1m.copy()
+            inf_1m['rsi_1m'] = ta.RSI(inf_1m, timeperiod=14)
+            inf_1m['ema_slow_1m'] = ta.EMA(inf_1m, timeperiod=50)
+            inf_1m['vol_mean_1m'] = inf_1m['volume'].rolling(10).mean()
+            
+            # Airbag Persistencia (3 velas por encima de EMA con volumen)
+            inf_1m['airbag_short_trigger'] = ((inf_1m['close'] > inf_1m['ema_slow_1m']) & (inf_1m['volume'] > inf_1m['vol_mean_1m'])).rolling(3).min()
+            
+            # Componentes adicionales para el scoring
+            inf_1m['pa_bearish'] = (inf_1m['close'] < inf_1m['open']).astype(int)
+            inf_1m['exhaust_short'] = (inf_1m['rsi_1m'] > 70).astype(int)
+            inf_1m['div_bearish'] = ((inf_1m['close'] >= inf_1m['close'].shift(1)) & (inf_1m['rsi_1m'] < inf_1m['rsi_1m'].shift(1))).astype(int)
+            
+            inf_1m_vars = inf_1m[['date', 'rsi_1m', 'ema_slow_1m', 'vol_mean_1m', 'airbag_short_trigger', 'pa_bearish', 'exhaust_short', 'div_bearish']]
+            inf_1m_vars = inf_1m_vars.rename(columns={'rsi_1m': 'pair_rsi_1m', 'airbag_short_trigger': 'pair_airbag_short_trigger'})
+            
+            dataframe = pd.merge_asof(
+                dataframe.sort_values('date'),
+                inf_1m_vars.sort_values('date'),
+                on='date',
+                direction='backward'
+            )
+            
+            # Construcción del SCORING (opcional, para la entrada)
+            dataframe['score_short'] = dataframe['pa_bearish'] + dataframe['exhaust_short'] + dataframe['div_bearish']
+            
+        else:
+            dataframe['pair_rsi_1m'] = np.nan
+            dataframe['pair_airbag_short_trigger'] = 0
+            dataframe['score_short'] = 0
             
         return dataframe
 
@@ -213,6 +248,11 @@ class ChacalSniper_Bear44(IStrategy):
             btc_rsi_1m_prev = float(dataframe.iloc[-2].get('btc_rsi_1m', np.nan))
             btc_rsi_5m_now  = float(last_candle.get('btc_rsi_5m', np.nan))
             btc_rsi_1h_now  = float(last_candle.get('btc_rsi_1h', np.nan))
+            airbag_trigger = last_candle.get('pair_airbag_short_trigger', 0)
+
+            # NUEVO AIRBAG CUÁNTICO (Salva la cuenta si el par hace un breakout real alcista)
+            if airbag_trigger == 1:
+                return "airbag_1m_pump_real"
 
             if pd.notna(btc_rsi_1m_now) and pd.notna(btc_rsi_1m_prev) and pd.notna(btc_rsi_5m_now) and pd.notna(btc_rsi_1h_now):
                 # Evaluación en Cascada

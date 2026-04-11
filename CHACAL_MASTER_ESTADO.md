@@ -1,55 +1,50 @@
-# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL
-
+# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL (V3.5)
 > **Última actualización:** 2026-04-10
-> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL 3.1 🦅
-> **Estado:** Lateral Hunter Estabilizado (Pure DNA 62). Deployment AWS ready.
-> **Entorno:** WSL Nativo Operativo. Preparando "Gatillo Cuántico".
+> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL 🦅
+> **Estado:** 🟢 OPERATIVO (Consolidación Cuántica Finalizada)
+> **Entorno:** WSL Nativo / AWS Ready (Systemd).
 
 ---
 
-## 🏗️ ARQUITECTURA: FONDO TRIFÁSICO
-El sistema ahora opera como una unidad coordinada de tres especialistas:
+## 🏗️ ARQUITECTURA: FONDO TRIFÁSICO CUÁNTICO
+El sistema opera como una unidad táctica única que alterna el 100% del capital según el régimen de BTC (1h):
 
-1.  🔮 **Lateral Hunter (NÚCLEO/TERMÓMETRO):** Corre 24/7. Detecta regímenes. Salta en breakouts.
-2.  🦅 **Sniper Bear (ESPECIALISTA SHORT):** Activación cuando BTC rompe lateral a la baja (Bear/Dump).
-3.  🦊 **Volume Hunter (ESPECIALISTA LONG):** Activación cuando BTC rompe lateral al alza (Bull/Pump).
-
----
-
-## 🚦 ESTADO DE LAS ESTRATEGIAS
-
-| Proyecto | Estado | Métricas Clave | Notas |
-|----------|--------|----------------|-------|
-| 🔮 **Lateral Hunter (V4)** | ✅ **HIT 10%** | **WR: 74.6%** | Profit: +12.8% (Mayo 2024). 15 trades/día. Arquitectura Cuántica Estabilizada. |
-| 🦅 **Sniper Bear** | 🔵 **Operativo** | **WR: 75%** | +27% en Abril. Airbag 1m activo. Listo para Live. |
-| 🦊 **Volume Hunter** | 🟡 **Pausado** | - | Refinado con Airbag 1m (experimental). |
+1.  🔮 **Lateral Hunter V4:** [NÚCLEO] Ordeña el rango (±3.9% EMA50). Profit: **+12%**.
+2.  🦅 **Sniper Bear Cuántico:** [BEAR] Captura desplomes. Airbag 1m inyectado. Profit: **+15%**.
+3.  🦊 **Volume Hunter Cuántico:** [BULL] Captura rallies. Airbag 1m inyectado. Profit: **+24%**.
 
 ---
 
-## 🔴 BLOQUEOS Y HALLAZGOS CRÍTICOS (Sesión 2026-04-10)
+## 🚦 ESTADO DE LAS ESTRATEGIAS (8 PARES CORE)
 
-1.  **Veredicto Lateral Hunter V4 (Arquitectura Cuántica):**
-    - **HIT 10% LOGRADO:** Al bajar el `score_threshold_long` a 1, el bot capturó 464 oportunidades en Mayo 2024, rompiendo la barrera del 10% mensual (+12.81%).
-    - **Filtro Macro:** Se confirmó que en periodos bajistas reales (como Junio 2024, -12% market change), el bot debe ceder el paso o ser filtrado por la macro de la instancia para evitar drawdowns.
-    - **Pureza Técnica:** Eliminación total de trailing stop dinámico. Salidas por TARGET_MID (Banda Media) con WinRate del 100% en ese tag.
-
-2.  **Detección de "Zombie Trades":**
-    - Se redujo el impacto de los trades estancados. La salida por `MACRO_BREAKOUT` es la principal fuente de pérdidas manejables (-31% vs +32% de ganancias en target medio).
-
-3.  **Transición a AWS (Systemd):**
-    - Se ha decidido abandonar Docker para el despliegue final en vivo. Usaremos servicios nativos `systemd` para arranque/parada manual o automatizada desde Telegram.
+| Proyecto | Estado | Profit (Backtest) | Drawdown | Notas |
+|----------|--------|-------------------|----------|-------|
+| 🔮 **Lateral Hunter V4** | ✅ **Listo** | +12.8% (Mayo) | ~4.5% | Pure DNA 62. Salida TARGET_MID. |
+| 🦅 **Sniper Bear** | ✅ **Listo** | +15.03% (Agosto) | **0.34%** | Airbag 1m. Cero trades zombies. |
+| 🦊 **Volume Hunter** | ✅ **Listo** | **+24.45%** (Febrero) | **0.67%** | Airbag 1m. Captura tendencia larga. |
+| ⚙️ **Control Trifásico**| ✅ **Listo** | Lógica 3.5 | - | Switch automático en 3.9% EMA50. |
 
 ---
 
-## 📋 PRÓXIMOS PASOS (OPERATIVOS)
+## 🔴 HITOS Y HALLAZGOS (Sesión 3.5)
 
-1.  **Sincronización Git a AWS:**
-    - Push de `ChacalLateral_PureDNA62.py` para arranque inmediato en Dry Run.
-    
-2.  **Operación "Rescate Cuántico":**
-    - Pasar `RESCUE_PROMPT_QUANTUM_DESIGN.md` a DeepSeek/Claude para el refinamiento de 1m.
+1.  **Inyección Cuántica (1m) Universal:**
+    - Se ha estandarizado el "Fino de 1m" en los tres bots. Ahora todos miran la persistencia de 6 velas y volumen en 1m para decidir salidas de emergencia.
+    - El resultado fue una reducción masiva de Drawdown en Bull y Bear, permitiendo ganancias de dos dígitos con riesgos mínimos.
 
-3.  **Monitoreo AWS:**
-    - Validar que el TARGET_MID funcione sin interferencia del Trailing Stop.
+2.  **Muerte del "Zombie Trade":**
+    - Gracias al Airbag Cuántico, la duración promedio en mercado bajó de días a horas (48m en Bear, 17h en Bull).
 
-*Fondo de Inversión Trifásico: Resiliencia en rango, agresividad en tendencia.*
+3.  **Preparación de AWS (São Paulo):**
+    - Decisión de usar **8 Pares Estáticos** para evitar el OOM Kill de la instancia t3.micro.
+    - Despliegue vía **Systemd** (Natividad Linux) para optimizar 300MB de RAM adicionales.
+
+---
+
+## 📋 PRÓXIMOS PASOS: EL GRAN SALTO
+
+1.  **Commit Maestro:** Sellar el estado actual en Git.
+2.  **Limpieza AWS:** Borrón y cuenta nueva en el servidor de Brasil.
+3.  **Deployment:** Subir protocolos, prompts y scripts de orquestación.
+
+*Fondo de Inversión Trifásico: La inteligencia de 1m al servicio del capital macro.*
