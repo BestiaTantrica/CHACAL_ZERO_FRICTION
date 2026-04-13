@@ -67,6 +67,13 @@ class ChacalSniper_Bear44(IStrategy):
 
     stoploss = -0.12 # Red de seguridad final
     timeframe = '5m'
+    
+    # ── FIX TÉCNICO V4.1 (AIRBAG DE INICIALIZACIÓN LIVE) ──
+    # Para calcular una EMA(50) en el timeframe de 1h ("BTC/USDT", "1h"), 
+    # Freqtrade en modo Live (AWS) necesita precargar suficientes velas base (5m).
+    # 50 horas * 12 velas/hora = 600 velas. Ponemos 1200 para dar margen exacto al ATR y MACD.
+    # Sin esto, ema50 da NaN y bloquea el master_bear_switch perpetuamente.
+    startup_candle_count = 1200
 
     def _hardened_bear_sl(self, pair: str) -> float:
         dna_sl = self.hyperopt_dna.get(pair, {"bear_sl": -0.09})["bear_sl"]

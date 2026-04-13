@@ -16,6 +16,10 @@ user_data/tradesv3*
 # Logs y Resultados Temporales
 *.log
 *.txt
+*.json
+!user_data/strategies/*.json
+CHACAL_MARKET_DUMP*.json
+oci_config*
 user_data/logs/
 user_data/backtest_results/
 user_data/plot_results/
