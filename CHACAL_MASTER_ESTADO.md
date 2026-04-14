@@ -37,9 +37,10 @@ El sistema ha evolucionado a una estructura de dos especialistas de alta precisi
 
 ## 📋 PRÓXIMOS PASOS (PROTOCOLO AWS)
 
-1. **Monitorización Activa:** Iniciar el log de producción en `MONITOREO_TRIFASICO.md`.
-2. **Health Check AWS:** Verificar Swap (4GB) y logs de `systemd` para asegurar 0% de OOM Kill.
-3. **Ajuste de Pares:** Mantener los 8 pares estáticos para máxima estabilidad en T3.Micro.
+1. **Validación Banda de Relevo:** Testear Estrategia Lateral en rangos 1.9% a 3.9% para evitar colisiones.
+2. **Desarrollo Radar de Sustos:** Implementar medición milimétrica (Z-Score) por moneda.
+3. **Escalado OCI (24GB):** Preparar migración para análisis masivo del Top 150.
+4. **Health Check AWS:** Verificar Swap (4GB) y logs de `systemd` para asegurar 0% de OOM Kill.
 
 ---
 

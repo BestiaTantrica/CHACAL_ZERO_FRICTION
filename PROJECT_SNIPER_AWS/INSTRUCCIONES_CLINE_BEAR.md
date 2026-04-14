@@ -165,28 +165,25 @@ master_bear_switch = btc_trend_bear AND btc_vol_active
 
 ### 5.1 Verificar Estado del Bot en AWS
 ```cmd
-REM Ver contenedores activos
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker ps"
+REM Ver estado del servicio nativo
+ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "sudo systemctl status ft-bear"
 
 REM Ver logs recientes
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker logs --tail 50 Chacal_Sniper_AWS_Env"
+ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "journalctl -u ft-bear -n 50 -f"
 
-REM Ver trades abiertos
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker exec Chacal_Sniper_AWS_Env freqtrade status"
-
-REM Ver balance
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker exec Chacal_Sniper_AWS_Env freqtrade balance"
+REM Ver trades abiertos (vía venv nativo)
+ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "source /home/ec2-user/freqtrade/.venv/bin/activate && freqtrade status"
 ```
 
 ### 5.2 Deploy de Cambios en AWS (Flujo Completo)
 ```cmd
 REM PASO 1 — Commitear cambios locales
-git add PROJECT_SNIPER_AWS\
-git commit -m "[Bear] descripción del cambio - YYYY-MM-DD"
+git add .
+git commit -m "[Elite] Deploy V5 Sniper Bear - 2026-04-14"
 git push origin master
 
-REM PASO 2 — Pull en server y reinicio
-ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/freqtrade && git pull origin master && docker-compose down && docker-compose up -d"
+REM PASO 2 — Pull en server y reinicio nativo
+ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/freqtrade && git pull origin master && sudo systemctl restart ft-bear"
 
 REM PASO 3 — Verificar que arrancó
 ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "docker logs --tail 30 Chacal_Sniper_AWS_Env"
@@ -221,15 +218,13 @@ ssh -i skills\llave-sao-paulo.pem ec2-user@15.229.158.221 "cd /home/ec2-user/fre
 
 ### 6.1 Backtest Bear (Futuros) — Comando Correcto
 ```cmd
-docker run --rm ^
-  -v "C:\CHACAL_ZERO_FRICTION\PROJECT_SNIPER_AWS\user_data:/freqtrade/user_data" ^
-  freqtradeorg/freqtrade:stable backtesting ^
-  --config /freqtrade/user_data/configs/config_backtest.json ^
-  --strategy ChacalSniper_Bear_ULTRA ^
-  --timerange 20240801-20240901 ^
-  --datadir /freqtrade/user_data/data/binance/futures ^
-  --data-format json ^
-  --exchange binance
+REM Usa el venv de WSL ya configurado para backtests nativos
+wsl /mnt/c/CHACAL_ZERO_FRICTION/.venv_wsl/bin/python3 /mnt/c/CHACAL_ZERO_FRICTION/.venv_wsl/bin/freqtrade backtesting ^
+  --userdir /mnt/c/CHACAL_ZERO_FRICTION/PROJECT_SNIPER_AWS/user_data ^
+  --config /mnt/c/CHACAL_ZERO_FRICTION/PROJECT_SNIPER_AWS/user_data/configs/config_backtest.json ^
+  --strategy ChacalSniper_BearV5 ^
+  --timerange 20240801-20240831 ^
+  --data-format feather
 ```
 
 > **⚠️ CRÍTICO:** Siempre usar `--datadir`, `--data-format json` y `--exchange binance` para futuros.

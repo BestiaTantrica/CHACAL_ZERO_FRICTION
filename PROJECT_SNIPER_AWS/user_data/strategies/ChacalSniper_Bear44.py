@@ -207,7 +207,6 @@ class ChacalSniper_Bear44(IStrategy):
         v_eff = dna['v_factor'] * self.v_factor_mult.value
 
         short_cond = (
-            (dataframe['master_bear_switch'] == 1) &
             (dataframe['volume'] > (dataframe['volume_mean'] * self.volume_mult.value)) &
             (dataframe['price_change'] < -0.001) &
             (dataframe['rsi'] < self.rsi_bear_thresh.value) &

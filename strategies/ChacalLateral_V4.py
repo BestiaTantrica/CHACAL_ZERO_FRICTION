@@ -61,9 +61,10 @@ class ChacalLateral_V4(IStrategy):
             dataframe = pd.merge(dataframe,
                 btc_1h[['date', 'close', 'ema50']].rename(columns={'close': 'btc_close'}),
                 on='date', how='left').ffill()
+            dataframe['btc_dist'] = (dataframe['btc_close'] - dataframe['ema50']) / dataframe['ema50']
             dataframe['is_lateral'] = (
-                (dataframe['btc_close'] > dataframe['ema50']*(1-self.lateral_threshold.value)) &
-                (dataframe['btc_close'] < dataframe['ema50']*(1+self.lateral_threshold.value))
+                ((dataframe['btc_dist'] >= 0.019) & (dataframe['btc_dist'] <= 0.039)) |
+                ((dataframe['btc_dist'] <= -0.019) & (dataframe['btc_dist'] >= -0.039))
             )
         else:
             dataframe['is_lateral'] = False
