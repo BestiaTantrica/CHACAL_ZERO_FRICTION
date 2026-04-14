@@ -66,7 +66,7 @@ class ChacalSniper_BearV5(IStrategy):
     trailing_stop_positive_offset = 0.025
     trailing_only_offset_is_reached = True
 
-    stoploss = -0.12 
+    stoploss = -0.99 
     timeframe = '5m'
     startup_candle_count = 1200
 
