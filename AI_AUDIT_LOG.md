@@ -26,7 +26,9 @@
 
 ---
 
-## 🛰️ PROTOCOLO DE ACTUALIZACIÓN
-1.  Toda nueva sugerencia de Claude Sonnet debe ser anotada en este log antes de ser codificada.
-2.  Se prohíbe la creación de archivos `.bak` o duplicados en la carpeta raíz.
-3.  El despliegue en AWS debe ser **Nativo** usando `scp` para archivos sensibles (`config.json`).
+## 🛰️ PROTOCOLO DE DESPLIEGUE FÁCIL (ZERO FRICTION)
+
+Para evitar errores de tokens y comandos manuales, usar el script institucional:
+1.  **Ejecutar:** `.\SYNC_TO_AWS.bat` desde la raíz.
+2.  **Efecto:** Sube estrategias, sincroniza datos `.feather` y reinicia el bot en AWS automáticamente.
+3.  **Seguridad:** El script no toca los archivos `config.json` para no pisar tus API Keys reales en el servidor.
