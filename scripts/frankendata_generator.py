@@ -11,9 +11,9 @@ SYMBOL = 'BTC/USDT'
 TIMEFRAMES = ['1m', '1h']
 LATERAL_THRESHOLD = 0.039  # 3.9%
 MIN_SLICE_DURATION = 120   # 2 horas en velas de 1m
-DAYS_BACK = 30
+DAYS_BACK = 180
 OUTPUT_PAIR = 'BTC_FRANKEN'
-DATA_DIR = 'PROJECT_SNIPER_AWS/user_data/data'
+DATA_DIR = 'PROJECT_SNIPER_AWS/user_data/data/franken_data/futures'
 
 exchange = ccxt.binance({'options': {'defaultType': 'future'}})
 

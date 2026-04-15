@@ -22,28 +22,31 @@
 
 > **Gatillo de Cambio:** ±4.3% Desviación EMA50 (1h)
 
-- **Precio BTC:** $73,476.1
-- **EMA50 (1h):** ~$72,576.0 (Calc.)
-- **Desviación:** 1.24%
-- **BOT ACTIVO:** 🦅 **SNIPER BEAR ULTRA (7x)**
+- **Precio BTC:** $74,178.5 (Auditado)
+- **EMA50 (1h):** ~$73,546.0 (Calc.)
+- **Desviación:** 0.86%
+- **BOT ACTIVO:** 🦅 **SNIPER BEAR V5** (Short-only)
 
 ---
 
 ## 📝 3. LOG DINÁMICO (CONDENSADO)
 
-### [2026-04-11 17:15] - AUDITORÍA INICIAL (PRE-FLY)
+### [2026-04-14 23:25] - AUDITORÍA DE RUTINA (PEGASO)
 
-- **Evento:** Sincronización exitosa con la instancia São Paulo.
-- **Régimen:** Mercado detectado como Lateral/Bear (Diff 1.24%).
-- **Acción:** Sniper Bear operando con 8 pares core estáticos. 0% Drawdown actual.
+- **Evento:** Verificación de racha sin trades.
+- **Hallazgo 1:** Se detectaron 3 trades recientes (BTC, DOGE, XRP), todos SHORTS.
+- **Hallazgo 2:** El sistema cambió de BULL a BEAR hoy a las 16:09 UTC.
+- **Hallazgo 3:** El Bot Bull (Volume Hunter) fue detenido con 2 órdenes activas (Simuladas) al cambiar el régimen.
+- **Diagnóstico:** El sistema está en el "Gap de Largos" (0% a 4.3% sobre EMA50). En este rango, el orquestador mantiene el Sniper Bear (Short-only), ignorando las subidas lentas.
+- **Estado:** Operativo al 100%. Salud del servidor óptima (Swap 4GB OK).
 
 ---
 
 ## 🛠️ 4. ACCIONES DE MANTENIMIENTO REQUERIDAS
 
-- [ ] Ejecutar primer `status` en AWS.
-- [ ] Verificar que el script de orquestación `Chacal_Trifasico_Control.py` esté operando bajo el umbral del 4.3%.
-- [ ] Validar que el Swap de 4GB esté activo para evitar OOM Kill.
+- [X] Ejecutar primer `status` en AWS. (PEGASO 2026-04-14)
+- [ ] Evaluar reducción de `LATERAL_THRESHOLD` a 2.5% para activar Bull Hunter antes.
+- [ ] Verificar sincronización de API Keys en Binance (Dry Run activo actualmente).
 
 ---
 
