@@ -32,9 +32,9 @@ class ChacalLateral_V5(IStrategy):
 
     # --- DNA MACRO (Escalado a 1m) ---
     band_proximity    = DecimalParameter(0.0005, 0.005, default=0.002, space='buy', optimize=True)
-    # Apretados al rango REAL del mercado micro-lateral (audit: 0.61% rango/hora)
-    bb_width_max      = DecimalParameter(0.005, 0.05, default=0.025, space='buy', optimize=True)
-    bb_width_min      = DecimalParameter(0.001, 0.01, default=0.003, space='buy', optimize=True)
+    # Apretados al rango REAL: solo operamos si el canal tiene al menos 0.8% de ancho
+    bb_width_max      = DecimalParameter(0.015, 0.06, default=0.03, space='buy', optimize=True)
+    bb_width_min      = DecimalParameter(0.008, 0.015, default=0.01, space='buy', optimize=True)
     
     # Filtro de microestructura (Orderbook proxy)
     spread_max_limit  = DecimalParameter(0.001, 0.005, default=0.003, space='buy', optimize=True)
@@ -97,35 +97,23 @@ class ChacalLateral_V5(IStrategy):
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         # GATILLO CUÁNTICO REFINADO: Buscar CONFIRMACIÓN de rebote, no atajar cuchillos cayendo.
         long_cond = (
-            (dataframe['bb_width'] < self.bb_width_max.value) & 
             (dataframe['bb_width'] > self.bb_width_min.value) & 
-            (dataframe['spread'] < self.spread_max_limit.value) & # Filtro liquidez
-            # La vela ANTERIOR debió tocar o estar muy cerca de la banda inferior
-            (dataframe['low'].shift(1) <= dataframe['bb_lower'].shift(1) * (1 + self.band_proximity.value)) & 
-            # La vela ACTUAL debe cerrar en positivo respecto a la anterior (Rebote confirmado)
-            (dataframe['close'] > dataframe['close'].shift(1)) & 
-            # RSI también debe acompañar el giro al alza
-            (dataframe['rsi_1m'] > dataframe['rsi_1m'].shift(1)) &
-            (dataframe['rsi_core'] < self.rsi_core_long_max.value) &
-            (dataframe['score_long'] >= self.score_threshold_long.value)
+            (dataframe['spread'] < self.spread_max_limit.value) & 
+            # Entrada al toque o perforación ligera
+            (dataframe['close'] <= dataframe['bb_lower'] * (1 + self.band_proximity.value)) & 
+            (dataframe['rsi_1m'] < self.rsi_core_long_max.value)
         )
         
         short_cond = (
-            (dataframe['bb_width'] < self.bb_width_max.value) & 
             (dataframe['bb_width'] > self.bb_width_min.value) & 
-            (dataframe['spread'] < self.spread_max_limit.value) & # Filtro liquidez
-            # La vela ANTERIOR debió tocar o estar muy cerca de la banda superior
-            (dataframe['high'].shift(1) >= dataframe['bb_upper'].shift(1) * (1 - self.band_proximity.value)) & 
-            # La vela ACTUAL debe cerrar en negativo respecto a la anterior (Rebote confirmado)
-            (dataframe['close'] < dataframe['close'].shift(1)) & 
-            # RSI también debe acompañar el giro a la baja
-            (dataframe['rsi_1m'] < dataframe['rsi_1m'].shift(1)) &
-            (dataframe['rsi_core'] > self.rsi_core_short_min.value) &
-            (dataframe['score_short'] >= self.score_threshold_short.value)
+            (dataframe['spread'] < self.spread_max_limit.value) & 
+            # Entrada al toque o perforación ligera
+            (dataframe['close'] >= dataframe['bb_upper'] * (1 - self.band_proximity.value)) & 
+            (dataframe['rsi_1m'] > self.rsi_core_short_min.value)
         )
 
-        dataframe.loc[long_cond, ['enter_long', 'enter_tag']] = [1, 'V5_LONG_CONFIRMED']
-        dataframe.loc[short_cond, ['enter_short', 'enter_tag']] = [1, 'V5_SHORT_CONFIRMED']
+        dataframe.loc[long_cond, ['enter_long', 'enter_tag']] = [1, 'V5_TOUCH_LONG']
+        dataframe.loc[short_cond, ['enter_tag', 'enter_short']] = ['V5_TOUCH_SHORT', 1]
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
@@ -136,51 +124,26 @@ class ChacalLateral_V5(IStrategy):
         if len(dataframe) == 0: return None
         last = dataframe.iloc[-1]
         
-        # 1. DETECTOR DE RUPTURA DE RÉGIMEN (Reemplaza el Time Exit idiota)
-        # Si el mercado dejó de ser lateral mientras estamos en trade, salimos sin dudar.
-        bb_width_now = last.get('bb_width', 0)
-        bb_width_threshold = self.bb_width_max.value * 1.5  # 50% más ancho = régimen roto
-        if bb_width_now > bb_width_threshold:
-            return 'REGIME_BREAK_EXIT'
+        # 1. TIME KILL SWITCH (Cero "trades zombies")
+        trade_duration = (current_time - trade.open_date_utc).total_seconds() / 60
+        if trade_duration > 20:
+            return 'TIME_EXIT_RECOVERY'
 
-        # 2. HEMORRAGIA RSI - Momentum Continuado en Contra (3 velas consecutivas)
-        # Si tras la entrada el RSI sigue deteriorándose 3 velas seguidas, el rebote fue falso.
-        dataframe_full = dataframe
-        if len(dataframe_full) >= 2:
-            rsi_vals = dataframe_full['rsi_1m'].iloc[-2:].values
-            if not trade.is_short:
-                # Para LONG: si RSI sigue bajando 2 velas seguidas y empezamos a perder
-                if current_profit < 0 and rsi_vals[0] > rsi_vals[1]:
-                    return 'MOMENTUM_FAIL_EXIT'
-            else:
-                # Para SHORT: si RSI sigue subiendo 2 velas seguidas y empezamos a perder
-                if current_profit < 0 and rsi_vals[0] < rsi_vals[1]:
-                    return 'MOMENTUM_FAIL_EXIT'
-        
-        # 3. SALIDA INSTITUCIONAL PURA (Target bb_upper - Máximo recorrido del lateral)
-        # Salimos al tocar la banda OPUESTA. Eso sí justifica el riesgo.
-        if current_profit > 0 and not trade.is_short and last['close'] >= last['bb_upper'] * (1 - self.band_proximity.value):
-            return 'TARGET_UPPER'  
-        if current_profit > 0 and trade.is_short and last['close'] <= last['bb_lower'] * (1 + self.band_proximity.value):
-            return 'TARGET_LOWER'
-        
-        # Salida intermedia de seguridad: si supera el mid con profit, aseguramos.
-        if current_profit > 0.005 and not trade.is_short and last['close'] >= last['bb_mid']:
-            return 'TARGET_MID_SAFE'
-        if current_profit > 0.005 and trade.is_short and last['close'] <= last['bb_mid']:
-            return 'TARGET_MID_SAFE'
+        # 2. TARGET MID (Salida de alta probabilidad)
+        if current_profit > 0.002:
+            if not trade.is_short and last['close'] >= last['bb_mid']:
+                return 'TARGET_MID'
+            if trade.is_short and last['close'] <= last['bb_mid']:
+                return 'TARGET_MID'
 
-        # 4. SALIDA AIRBAG (Stop dinámico: 1% de precio = ~1 hora de rango lateral)
-        # Si el precio se fue 1.6x el rango horario promedio en nuestra contra, el rebote no viene.
-        if current_profit < -0.010:
-            if not trade.is_short and last.get('airbag_long_trigger', 0) == 1: return 'AIRBAG_1M_DUMP'
-            if trade.is_short and last.get('airbag_short_trigger', 0) == 1: return 'AIRBAG_1M_PUMP'
-        # Corte absoluto de emergencia si se fue muy lejos
-        if current_profit < -0.025:
-            return 'AIRBAG_HARD'
+        # 3. SALIDA AIRBAG (Protección total contra Breakout)
+        if current_profit < -0.0085:
+            return 'AIRBAG_HARD_BREAK'
         
-        # Nota: La salida MACRO ha sido erradicada porque esta estrategia vivirá 
-        # dentro de un sandbox temporal de puro Lateralismo, garantizado por Chacal_Control.
+        if current_profit < -0.006:
+            if not trade.is_short and last.get('airbag_long_trigger', 0) == 1: return 'AIRBAG_TECHNICAL'
+            if trade.is_short and last.get('airbag_short_trigger', 0) == 1: return 'AIRBAG_TECHNICAL'
+        
         return None
 
     def leverage(self, *args, **kwargs) -> float:

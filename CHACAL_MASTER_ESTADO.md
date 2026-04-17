@@ -1,47 +1,49 @@
-# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL (V4.0 ELITE)
+# 📊 CHACAL MASTER ESTADO — TABLERO GLOBAL (V5.0 ELITE)
 
-> **Última actualización:** 2026-04-11
-> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL (Dual-Bot) 🦅🦊
-> **Estado:** 🔵 EN DESPLIEGUE (Producción AWS Ready)
+> **Última actualización:** 2026-04-16
+> **Ecosistema:** FONDO DE INVERSIÓN TRIFÁSICO CHACAL (Trifásico Multi-Cloud) 🦅🦊🐺
+> **Estado:** 🟢 OPERATIVO (Híbrido AWS + Oracle)
 > **Hilo de Monitoreo Directo:** [MONITOREO_TRIFASICO.md](file:///c:/CHACAL_ZERO_FRICTION/MONITOREO_TRIFASICO.md)
 
 ---
 
-## 🏗️ ARQUITECTURA: UNIDAD DUAL SNIPER (+527.8% ROI)
+## 🏗️ ARQUITECTURA: TRIADA DE ALTA PRECISIÓN (+31% Lateral / +527% Tendencial)
 
-El sistema ha evolucionado a una estructura de dos especialistas de alta precisión que rotan el 100% del capital según el umbral del 4.3% (EMA50 1h):
+El sistema opera ahora en una arquitectura multi-nube para máxima redundancia y eficiencia:
 
-1. 🦅 **SNIPER BEAR (7x):** Domina el mercado **Lateral y Bear**. Es el núcleo de mayor eficiencia y menor drawdown del sistema.
-2. 🦊 **FOX VOLUME HUNTER (10x):** Especialista **Bull**. Captura pumps explosivos con lógica de agotamiento (Bull Sniper Dip).
+1. 🦅 **SNIPER BEAR (7x) - AWS:** Domina el mercado **Bear**. (Activo según EMA50 BTC).
+2. 🦊 **VOLUME HUNTER (10x) - AWS:** Especialista **Bull**. Captura pumps explosivos.
+3. 🐺 **CHACAL LATERAL V5 (5x) - ORACLE:** Especialista en **Rangos Laterales**. Optimizado para 1m con arquitectura cuántica. (IP: 129.80.104.116 via Brasil Proxy).
 
 ---
 
-## 🚦 KPIs DE LABORATORIO (V4.0 CONSISTENTE)
+## 🚦 KPIs DE LABORATORIO (V5.0 CONSOLIDADO)
 
 | Métrica | Valor Validado | Estado Actual | Notas |
 | :--- | :--- | :--- | :--- |
-| **ROI Anual** | **+527.8%** | 🟢 Estable | Validación 1A data real. |
-| **Max Drawdown** | **22.3%** | 🟢 Bajo Control | ADN Sniper inyectado. |
-| **WinRate** | **> 68%** | 🟢 Alto | WinRate de Fox elevado al 74%. |
-| **Orquestación** | ✅ **Activa** | 🟢 Systemd | Control vía 4.3% BTC EMA50. |
+| **ROI Lateral (V5)** | **+31.12%** | 🟢 Dry Run | Testeado en 6 meses de rango. |
+| **ROI Tendencial** | **+527.8%** | 🟢 Standby | Esperando ruptura de EMA50. |
+| **Infraestructura** | ✅ **Híbrida** | 🟢 Estable | AWS (Brasil) + Oracle (Ashburn). |
+| **Conectividad** | ✅ **Proxy SOCKS5** | 🟢 Activo | Bypass de restricciones de IP US. |
 
 ---
 
-## 🔴 HITOS DE LA UNIFICACIÓN (SESIÓN 4.0)
+## 🔴 HITOS DE LA RECONSTRUCCIÓN (V5.0)
 
-1. **Consolidación Dual:** Se ha retirado el Lateral Hunter V4 como servicio independiente; el Sniper Bear asume el mando del régimen lateral por su superioridad en WinRate y eficiencia en AWS.
-2. **Umbral Cuántico 4.3%:** El gatillo de cambio se ha ajustado al 4.3% para absorber falsos breakouts y maximizar el tiempo del Sniper en mercado.
-3. **Gestión de Capital 100%:** El orquestador garantiza que nunca operen dos bots a la vez, eliminando el riesgo de sobre-apalancamiento y APIs bloqueadas.
-
----
-
-## 📋 PRÓXIMOS PASOS (PROTOCOLO AWS)
-
-1. **Validación Banda de Relevo:** Testear Estrategia Lateral en rangos 1.9% a 3.9% para evitar colisiones.
-2. **Desarrollo Radar de Sustos:** Implementar medición milimétrica (Z-Score) por moneda.
-3. **Escalado OCI (24GB):** Preparar migración para análisis masivo del Top 150.
-4. **Health Check AWS:** Verificar Swap (4GB) y logs de `systemd` para asegurar 0% de OOM Kill.
+1. **Despliegue Oracle Cloud:** Finalizada la instalación nativa de Freqtrade 2023.3 en instancia Micro (Ashburn) tras superar bloqueos de Python y TA-Lib.
+2. **Puente Cuántico de Red:** Implementación de Túnel SSH (SOCKS5) redirigido vía Privoxy para asegurar latencia mínima y evasión de bloqueos geográficos de Binance.
+3. **Integración Telegram:** Bot `@oracle_trad_bot` vinculado exitosamente para reportes en tiempo real.
+4. **Optimización de Memoria:** Abandono total de Docker en favor de servicios `systemd` nativos, liberando un 35% de recursos en instancias Micro.
 
 ---
 
-*Fondo Elite: El dominio total de la volatilidad a través de la precisión Sniper.*
+## 📋 PRÓXIMOS PASOS (FASE 5.1)
+
+1. **Expansión Lateral:** Incorporar gradualmente de 4 a 6 pares (altcoins de baja volatilidad) a la instancia de Oracle.
+2. **Estudio "Smart Pumps":** Investigar patrones predecibles en Fan Tokens (OG, SANTOS, LAZIO) basados en calendario de eventos.
+3. **Auditoría Bear/Bull:** Investigar inactividad del orquestador en AWS y ajustar umbrales si es necesario.
+4. **Git Cleanup:** Consolidar repositorios y realizar commits de estabilización.
+
+---
+
+*Fondo Trifásico: Adaptabilidad absoluta ante cualquier régimen de mercado.*
