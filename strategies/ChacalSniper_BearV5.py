@@ -105,7 +105,10 @@ class ChacalSniper_BearV5(IStrategy):
             rsi_strength = (1 - dataframe['btc_rsi_1h'] / 100)
 
             dataframe['bear_strength'] = (0.4 * ema_dist + 0.3 * vol_strength + 0.3 * rsi_strength)
-            dataframe['master_bear_switch'] = (dataframe['bear_strength'] > 0.55).astype(int)
+            # ELIMINADO EL FRENO ESTÚPIDO ("Master Bear Switch")
+            # El Orquestador ahora manda. Si la estrategia está activa, tiene libertad 
+            # de operar. Lógica de rentabilidad abierta.
+            dataframe['master_bear_switch'] = 1
         else:
             dataframe['master_bear_switch'] = 1
             dataframe['btc_rsi_1h'] = 50

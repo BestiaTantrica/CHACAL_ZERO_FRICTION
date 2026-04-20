@@ -46,13 +46,30 @@ def get_btc_data():
         print(f"Error API Binance: {e}")
         return None
 
+def check_recent_failure():
+    """Revisa la base de datos de freqtrade. Si el último trade cerrado fue negativo, retorna True"""
+    db_path = '/home/ubuntu/chacal/user_data/trifasico.sqlite'
+    if not os.path.exists(db_path):
+        return False
+    try:
+        import sqlite3
+        conn = sqlite3.connect(db_path)
+        c = conn.cursor()
+        c.execute('SELECT profit_ratio FROM trades WHERE is_open = 0 ORDER BY id DESC LIMIT 1')
+        row = c.fetchone()
+        conn.close()
+        if row and row[0] is not None and row[0] < 0:
+            return True
+    except:
+        pass
+    return False
+
 def main():
     token, chat_id = get_telegram_config()
     last_regime = None
     
-    msg_init = "--- INICIANDO CEREBRO SNIPER KING V4.0 (+527% ROI) ---"
+    msg_init = "--- INICIANDO CEREBRO SNIPER KING V4.0 (Logic Feedback Mode) ---"
     print(msg_init)
-    # No enviamos el init para no spamear si hay reinicios por error
     
     while True:
         df = get_btc_data()
@@ -62,16 +79,24 @@ def main():
             last_ema = df['ema50'].iloc[-1]
             diff_pct = (last_price / last_ema) - 1
             
-            # --- LÓGICA DUAL ELITE ---
-            # Si BTC < EMA50 + 4.3% -> Sniper Bear domina (Lateral y Bear)
-            # Si BTC > EMA50 + 4.3% -> Volume Hunter domina (Fomo/Pure Bull)
-            
+            # 1. REFERENCIA BASE CLÁSICA (Indicadores Reales)
             if diff_pct < LATERAL_THRESHOLD:
-                regime = "ELITE_SNIPER_BEAR" # Cubre Lateral y Bear
+                base_regime = "ELITE_SNIPER_BEAR"
             else:
-                regime = "ELITE_VOLUME_HUNTER" # Cubre Bull Extremo
+                base_regime = "ELITE_VOLUME_HUNTER"
             
-            print(f"[{time.strftime('%H:%M:%S')}] BTC: ${last_price} | Diff: {round(diff_pct*100, 2)}% | Régimen: {regime}", flush=True)
+            # 2. FEEDBACK ACTIVO (Intercalar si falla)
+            # La orden es clara: "si una falla entra la otra"
+            last_failed = check_recent_failure()
+            
+            if last_failed:
+                regime = "ELITE_VOLUME_HUNTER" if base_regime == "ELITE_SNIPER_BEAR" else "ELITE_SNIPER_BEAR"
+                status_note = " (INTERCALADO POR FALLO RECIENTE)"
+            else:
+                regime = base_regime
+                status_note = ""
+            
+            print(f"[{time.strftime('%H:%M:%S')}] BTC: ${last_price} | Diff: {round(diff_pct*100, 2)}% | Régimen: {regime}{status_note}", flush=True)
 
             if regime != last_regime:
                 change_msg = f"🔄 CAMBIO DE RÉGIMEN: {last_regime} -> {regime}"

@@ -76,11 +76,10 @@ class ChacalVolumeHunter_V5(IStrategy):
         # FUZZY BULL CONFIDENCE
         # (rsi_1h - 40) / 30 -> 0 a 1 si el RSI está entre 40 y 70
         # (rsi_5m - 45) / 30 -> 0 a 1 si el RSI 5m está entre 45 y 75
-        dataframe['bull_confidence'] = (
-            0.5 * (dataframe['btc_rsi_1h'] - 40).clip(0, 30) / 30 +
-            0.5 * (dataframe['btc_5m_rsi'] - 45).clip(0, 30) / 30
-        )
-        dataframe['is_bull_market'] = (dataframe['bull_confidence'] > 0.4)
+        # ELIMINADO EL FRENO BULL LOGIC ("Pared Imaginaria")
+        # En la vida real, el orquestador regula esto. Cuando enciende, se asume bull.
+        dataframe['bull_confidence'] = 1.0
+        dataframe['is_bull_market'] = True
 
         # ATRASO REAL Y CORRELACIÓN (Ventana reducida)
         dataframe['atraso_real'] = dataframe['btc_5m_close'].pct_change(5) - dataframe['close'].pct_change(5)

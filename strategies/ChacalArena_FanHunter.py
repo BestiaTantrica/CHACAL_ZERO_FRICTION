@@ -6,9 +6,12 @@ import talib.abstract as ta
 
 class ChacalArena_FanHunter(IStrategy):
     """
-    CHACAL ARENA - FAN HUNTER (V1.0)
-    Especialista en Eventos y Pumps Volátiles (Fan Tokens)
-    Estrategia Dual: Caza de Ignición y Short de Agotamiento.
+    CHACAL ARENA - FAN HUNTER (V5.0 - SHORT ONLY)
+    Tríada de la Arena: OG, SANTOS, LAZIO
+    Especialista en reversión de eventos pre-calendario.
+    
+    CALENDARIO OPERATIVO PRINCIPAL:
+    - Viernes, Sábados, Domingos (Fines de semana de ligas/torneos).
     """
     INTERFACE_VERSION = 3
     timeframe = '1m'
@@ -37,7 +40,7 @@ class ChacalArena_FanHunter(IStrategy):
     use_exit_signal = True
 
     def populate_indicators(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        # 1. Z-Score de Volumen (La clave de la ignición)
+        # 1. Z-Score (Detección de anomalía de volumen)
         dataframe['vol_mean'] = dataframe['volume'].rolling(window=1440).mean()
         dataframe['vol_std'] = dataframe['volume'].rolling(window=1440).std()
         dataframe['z_score'] = (dataframe['volume'] - dataframe['vol_mean']) / dataframe['vol_std']
@@ -45,28 +48,19 @@ class ChacalArena_FanHunter(IStrategy):
         # 2. RSI (Detección de sobrecompra/venta)
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
         
-        # 3. EMA20 (Filtro de tendencia micro)
-        dataframe['ema20'] = ta.EMA(dataframe, timeperiod=20)
+        # 3. FILTRO DE MAGNITUD (La clave para absorber comisiones)
+        # Calcula si el precio ha subido al menos un X% desde el mínimo de la última hora
+        dataframe['min_60'] = dataframe['low'].rolling(window=60).min()
+        dataframe['pump_60m'] = (dataframe['close'] - dataframe['min_60']) / dataframe['min_60'] * 100
         
         return dataframe
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
-        # --- Lógica LONG (Ignition) ---
-        # Solo permitimos LONG en SANTOS según backtest de ruido
-        if metadata['pair'] == 'SANTOS/USDT':
-            dataframe.loc[
-                (
-                    (dataframe['z_score'] > self.z_threshold_long.value) &
-                    (dataframe['rsi'] < self.rsi_max_long.value) &
-                    (dataframe['close'] > dataframe['ema20'])
-                ),
-                'enter_long'] = 1
-
-        # --- Lógica SHORT (Exhaustion) ---
-        # SHORT permitido en todos (Es nuestra mayor fuente de profit)
+        # --- MODO SHORT ONLY (La Triada de la Arena rinde mejor a la contra) ---
         dataframe.loc[
             (
-                (dataframe['rsi'] > self.rsi_min_short.value)
+                (dataframe['rsi'] > self.rsi_min_short.value) & # Agotamiento masivo
+                (dataframe['pump_60m'] > 3.0) # Confirmación real del evento de anticipación
             ),
             'enter_short'] = 1
 
