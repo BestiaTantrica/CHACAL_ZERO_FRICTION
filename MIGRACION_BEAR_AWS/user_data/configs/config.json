@@ -10,7 +10,7 @@
     "fiat_display_currency": "USD",
     "dry_run": true,
     "max_open_trades": 8,
-    "timeframe": "1m",
+    "timeframe": "5m",
     "stoploss": -0.99,
     "entry_pricing": {
         "price_side": "same",

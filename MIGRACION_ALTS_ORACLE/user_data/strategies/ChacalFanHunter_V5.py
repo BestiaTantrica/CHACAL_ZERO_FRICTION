@@ -10,16 +10,23 @@ from freqtrade.strategy import (IStrategy, IntParameter, DecimalParameter)
 class ChacalFanHunter_V5(IStrategy):
     """
     ========================================================
-             CHACAL FAN-HUNTER V5 (Extreme Reversion)
+             CHACAL FAN-HUNTER V5.3 (Extreme Reversion)
     ========================================================
     Estrategia de francotirador 1-minuto.
-    Desarrollada exclusivamente para Tokens de Alta Volatilidad (Eventos/Memes).
-    
+    Desarrollada para Tokens de Alta Volatilidad (Fan Tokens + Memes).
+
     Lógica de Combate:
-    - Longs: Detecta un volumen EXTREMADAMENTE ANORMAL (Z-Score > 10) 
-             combinado con RSI no saturado (< 65). Caza mechas de liquidación bajistas.
-    - Shorts: Dispara automáticamente frente a fomo masivo absoluto (RSI > 88).
-    - Exits: Retiros tácticos rápidos a la zona media del RSI o Take Profits fijos.
+    - Longs: Z-Score > 10 (volumen EXTREMADAMENTE anormal) + RSI < 65.
+             Caza mechas de liquidación bajistas en picos de evento.
+    - Shorts: RSI > 88 (FOMO masivo absoluto → corrección inminente).
+    - Filtro: Funding Rate en tiempo real para no entrar contra el flujo institucional.
+    - Exits: TakeProfit +5%/+8% y StopLoss -3%/-4% por custom_exit.
+
+    CORRECCIÓN CRÍTICA V5.3:
+    - startup_candle_count = 1500: OBLIGATORIO. Sin esto, el Z-Score devuelve
+      NaN en las primeras 1440 velas y el bot no genera NINGUNA señal.
+      Este era el único bug real. Los umbrales NO fueron modificados porque
+      fueron validados por el Mega-Scan de 6 meses (cientos de trades/par).
     """
     
     INTERFACE_VERSION = 3
@@ -27,17 +34,21 @@ class ChacalFanHunter_V5(IStrategy):
     timeframe = '1m'
     can_short = True
     
-    # ROI: Reemplazado por salidas tácticas de RSI
-    minimal_roi = {
-        "0": 100.0  # El ROI dinámico se maneja en custom_exit
-    }
-    stoploss = -0.99  # Se maneja con custom stoploss interno
+    # *** FIX CRÍTICO: El bot pide 1500 velas históricas al arrancar.
+    # Sin esto, el Z-Score de ventana 1440 devuelve NaN puro y no hay señales. ***
+    startup_candle_count = 1500
 
-    # --- PARÁMETROS V4 CRÍTICOS VALIDADOS EN LABORATORIO ---
-    vol_window = 1440  # Mapea las últimas 24hs (1440 mins)
-    z_score_long = 10.0
-    rsi_long_max = 65
-    rsi_short_min = 88
+    # ROI: Desactivado — se maneja con custom_exit
+    minimal_roi = {
+        "0": 100.0
+    }
+    stoploss = -0.99  # Se maneja con custom stoploss interno (custom_exit)
+
+    # --- PARÁMETROS VALIDADOS POR MEGA-SCAN (NO MODIFICAR SIN NUEVA EVIDENCIA) ---
+    vol_window    = 1440  # 24hs de contexto de volumen (1440 mins en 1m TF)
+    z_score_long  = 10.0  # Validado: eventos estadísticos extremos (Z > 10σ)
+    rsi_long_max  = 65    # Validado: RSI no saturado para caza de mechas
+    rsi_short_min = 88    # Validado: FOMO masivo que precede correcciones fuertes
 
     def populate_indicators(self, dataframe: pd.DataFrame, metadata: dict) -> pd.DataFrame:
         
@@ -46,8 +57,11 @@ class ChacalFanHunter_V5(IStrategy):
         dataframe['rsi'] = ta.RSI(dataframe, timeperiod=14)
 
         # 2. Z-Score Cuántico del Volumen
+        # Requiere startup_candle_count >= 1500 para que no sea NaN
         dataframe['vol_mean'] = dataframe['volume'].rolling(window=self.vol_window).mean()
         dataframe['vol_std']  = dataframe['volume'].rolling(window=self.vol_window).std()
+        # Protección: evitar división por cero en tokens con vol muy plano
+        dataframe['vol_std']  = dataframe['vol_std'].replace(0, np.nan)
         dataframe['z_score']  = (dataframe['volume'] - dataframe['vol_mean']) / dataframe['vol_std']
 
         return dataframe
@@ -57,27 +71,28 @@ class ChacalFanHunter_V5(IStrategy):
         dataframe['enter_short'] = 0
 
         pair = metadata.get('pair', '')
-        # --- DOCTRINA ELITE: Restricciones de entrada por Token ---
-        # Solo Short: Tokens que suben por spikes violentos y corrigen fuerte (WIF).
+        # WIF es Solo Short: sube por spikes violentos y corrige fuerte
         allow_long = True
         if "WIF" in pair:
             allow_long = False
 
-        # LONG: Explosión de volumen gigante + RSI no agotado (cacería de mechas)
+        # LONG: Explosión de volumen extrema + RSI no agotado
         if allow_long:
             dataframe.loc[
                 (
                     (dataframe['z_score'] > self.z_score_long) &
                     (dataframe['rsi'] < self.rsi_long_max) &
-                    (dataframe['volume'] > 0)
+                    (dataframe['volume'] > 0) &
+                    (dataframe['z_score'].notna())  # Garantiza que el warmup terminó
                 ),
                 'enter_long'] = 1
 
-        # SHORT: Fomo absurdo (Entrando en zona de corrección extrema)
+        # SHORT: FOMO extremo → corrección inminente
         dataframe.loc[
             (
                 (dataframe['rsi'] > self.rsi_short_min) &
-                (dataframe['volume'] > 0)
+                (dataframe['volume'] > 0) &
+                (dataframe['rsi'].notna())
             ),
             'enter_short'] = 1
 
@@ -87,19 +102,11 @@ class ChacalFanHunter_V5(IStrategy):
         dataframe['exit_long'] = 0
         dataframe['exit_short'] = 0
 
-        # Exit LONG: El fomo cedió y estamos listos para cobrar
-        dataframe.loc[
-            (
-                (dataframe['rsi'] > 85)
-            ),
-            'exit_long'] = 1
+        # Exit LONG: RSI llega a zona de sobrecompra → cerrar antes de que revierta
+        dataframe.loc[(dataframe['rsi'] > 85), 'exit_long'] = 1
 
-        # Exit SHORT: La pánico cedió, se revierte
-        dataframe.loc[
-            (
-                (dataframe['rsi'] < 45)
-            ),
-            'exit_short'] = 1
+        # Exit SHORT: RSI regresó a zona neutral → corrección terminó
+        dataframe.loc[(dataframe['rsi'] < 45), 'exit_short'] = 1
 
         return dataframe
         
@@ -108,27 +115,25 @@ class ChacalFanHunter_V5(IStrategy):
                            side: str, **kwargs) -> bool:
         """
         FILTRO DE EXPECTATIVAS (FUNDING RATE):
-        Juega con el miedo/codicia del mercado usando datos institucionales en tiempo real.
+        Consulta el funding rate en tiempo real antes de entrar al trade.
+        Si el mercado contradice la dirección → bloqueamos la entrada.
         """
         try:
-            # Obtener el funding rate actual desde la API de Binance
-            # Esto evita entrar en Shorts si el funding es negativo (nos cobran a nosotros)
-            # Y potencia entrar en Shorts si el funding es alto positivo (el mercado está muy Bull)
             funding_data = self.exchange.fetch_funding_rate(pair)
             funding_rate = funding_data.get('fundingRate', 0)
 
             if side == "short":
-                # Si el funding es muy negativo (< -0.01%), los shorts están saturados. NO ENTRAR.
+                # Funding muy negativo = shorts saturados = posible squeeze. NO ENTRAR.
                 if funding_rate < -0.0001:
                     return False
             
             if side == "long":
-                # Si el funding es muy positivo (> 0.1%), los longs están saturados de codicia. NO ENTRAR.
+                # Funding muy positivo = longs saturados de codicia. NO ENTRAR.
                 if funding_rate > 0.001:
-                    return bool(0)
+                    return False
 
         except Exception:
-            # Si falla la API por laguna razón, pasamos el trade igual
+            # Si la API de funding falla, el trade pasa igual
             return True
 
         return True
@@ -136,17 +141,18 @@ class ChacalFanHunter_V5(IStrategy):
     def custom_exit(self, pair: str, trade, current_time: datetime, current_rate: float,
                     current_profit: float, **kwargs) -> str:
         """
-        Salidas de precisión por umbrales fijos (Hard TakeProfit / StopLoss).
+        Salidas de precisión por umbrales fijos.
+        Se ejecuta en cada tick, sin esperar señales del dataframe.
         """
         if trade.is_short:
-            if current_profit >= 0.05:  # +5.0%
+            if current_profit >= 0.05:   # +5.0% → Cobrar
                 return "Hard TP Short"
-            if current_profit <= -0.03: # -3.0% Stoploss manual
+            if current_profit <= -0.03:  # -3.0% → Cortar pérdida
                 return "Hard SL Short"
         else:
-            if current_profit >= 0.08:  # +8.0%
+            if current_profit >= 0.08:   # +8.0% → Cobrar
                 return "Hard TP Long"
-            if current_profit <= -0.04: # -4.0% Stoploss manual
+            if current_profit <= -0.04:  # -4.0% → Cortar pérdida
                 return "Hard SL Long"
                 
         return None

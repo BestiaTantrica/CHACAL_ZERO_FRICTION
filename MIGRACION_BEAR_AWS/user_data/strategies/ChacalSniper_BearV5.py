@@ -43,6 +43,7 @@ class ChacalSniper_BearV5(IStrategy):
         "ADA/USDT:USDT":   {"v_factor": 3.408, "pulse_change": 0.005, "bear_roi": 0.042, "bear_sl": -0.022},
         "AVAX/USDT:USDT":  {"v_factor": 5.692, "pulse_change": 0.005, "bear_roi": 0.010, "bear_sl": -0.053},
         "LINK/USDT:USDT":  {"v_factor": 5.671, "pulse_change": 0.005, "bear_roi": 0.038, "bear_sl": -0.041},
+        "DOGE/USDT:USDT":  {"v_factor": 3.500, "pulse_change": 0.004, "bear_roi": 0.025, "bear_sl": -0.040},
     }
 
     # ================================================================
@@ -66,7 +67,7 @@ class ChacalSniper_BearV5(IStrategy):
     trailing_stop_positive_offset = 0.025
     trailing_only_offset_is_reached = True
 
-    stoploss = -0.99 
+    stoploss = -0.15 
     timeframe = '5m'
     startup_candle_count = 1200
 
@@ -109,7 +110,13 @@ class ChacalSniper_BearV5(IStrategy):
         # BTC 5m y 1m
         btc_5m = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="5m")
         if not btc_5m.empty:
-             dataframe['btc_rsi_5m'] = ta.RSI(btc_5m, timeperiod=14)
+            btc_5m = btc_5m.copy()
+            btc_5m['btc_rsi_5m'] = ta.RSI(btc_5m, timeperiod=14)
+            dataframe = pd.merge_asof(
+                dataframe.sort_values('date'),
+                btc_5m[['date', 'btc_rsi_5m']].sort_values('date'),
+                on='date', direction='backward'
+            )
 
         btc_1m = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1m")
         if btc_1m is not None and not btc_1m.empty:
@@ -147,7 +154,7 @@ class ChacalSniper_BearV5(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         short_cond = (
-            (dataframe['master_bear_switch'] == 1) &
+            (dataframe['bear_strength'] >= 0.35) &
             (dataframe['volume'] > (dataframe['volume_mean'] * self.volume_mult.value)) &
             (dataframe['price_change'] < -0.001) &
             (dataframe['rsi'] < self.rsi_bear_thresh.value) &
@@ -210,8 +217,9 @@ class ChacalSniper_BearV5(IStrategy):
         # LEVERAGE DINÁMICO ATR-BASED (Elite)
         dataframe, _ = self.dp.get_analyzed_dataframe(pair, self.timeframe)
         if dataframe is None or dataframe.empty: return 5.0
-        atr_rank = dataframe['btc_atr'].rolling(2016).rank(pct=True).iloc[-1]
+        atr_rank = dataframe['btc_atr'].rolling(2016, min_periods=200).rank(pct=True).iloc[-1]
         
-        if atr_rank < 0.3: return 7.0 # Calma relativa
+        if pd.isna(atr_rank): return 5.0
+        elif atr_rank < 0.3: return 7.0 # Calma relativa
         elif atr_rank < 0.6: return 5.0 # Normal
         else: return 3.0 # Protección
