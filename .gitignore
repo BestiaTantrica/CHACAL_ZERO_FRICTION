@@ -43,6 +43,7 @@ venv_linux/
 # Freqtrade Data (Ignorar sets de velas pesados)
 user_data/data/
 **/user_data/data/
+research_data/
 PROJECT_SNIPER_AWS/user_data/
 CHACAL_VOLUME_HUNTER/user_data/
 
