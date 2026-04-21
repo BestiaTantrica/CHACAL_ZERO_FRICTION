@@ -116,6 +116,7 @@ class ChacalSniper_Bear44(IStrategy):
         bollinger = qtpylib.bollinger_bands(qtpylib.typical_price(dataframe), window=20, stds=2)
         dataframe['bb_lowerband'] = bollinger['lower']
         dataframe['bb_middleband'] = bollinger['mid']
+        dataframe['bb_upperband'] = bollinger['upper']
         dataframe['price_change'] = (dataframe['close'] - dataframe['open']) / dataframe['open']
 
         btc_1h = self.dp.get_pair_dataframe(pair="BTC/USDT:USDT", timeframe="1h")
@@ -140,8 +141,13 @@ class ChacalSniper_Bear44(IStrategy):
             btc_trend_bear = dataframe['btc_close'] < dataframe['btc_ema50']
             btc_vol_active = dataframe['btc_atr'] > dataframe['btc_atr_mean']
             dataframe['master_bear_switch'] = (btc_trend_bear & btc_vol_active).astype(int)
+            
+            # --- MODO LATERAL (BTC cerca de EMA50) ---
+            # Si BTC está a menos del 1.5% de la EMA50, consideramos que es lateral fino.
+            dataframe['master_lateral_switch'] = (abs(dataframe['btc_close'] / dataframe['btc_ema50'] - 1) < 0.015).astype(int)
         else:
             dataframe['master_bear_switch'] = 1 # Fail-safe
+            dataframe['master_lateral_switch'] = 1
             dataframe['btc_rsi_1h'] = 50
 
         # DataFrame RSI BTC 5m para la Cascada
@@ -204,19 +210,35 @@ class ChacalSniper_Bear44(IStrategy):
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         pair = metadata['pair']
         dna = self.hyperopt_dna.get(pair, self.hyperopt_dna["BTC/USDT:USDT"])
+        # Usamos el v_factor del DNA multiplicado por el factor global
         v_eff = dna['v_factor'] * self.v_factor_mult.value
 
-        short_cond = (
-            (dataframe['volume'] > (dataframe['volume_mean'] * self.volume_mult.value)) &
+        # DISPARADOR 1: TREND CORE (El Sniper Clásico de Caídas)
+        # Solo entra si ADX es fuerte y el precio ya está rompiendo a la baja
+        trend_short = (
+            (dataframe['volume'] > (dataframe['volume_mean'] * v_eff)) &
             (dataframe['price_change'] < -0.001) &
             (dataframe['rsi'] < self.rsi_bear_thresh.value) &
-            (dataframe['rsi'] < dataframe['rsi'].shift(1)) &
-            (dataframe['close'] < dataframe['bb_middleband']) &
-            (dataframe['adx'] > self.adx_threshold.value)
+            (dataframe['adx'] > self.adx_threshold.value) &
+            (dataframe['close'] < dataframe['bb_middleband'])
         )
 
-        dataframe.loc[short_cond, 'enter_short'] = 1
-        dataframe.loc[short_cond, 'enter_tag'] = 'SNIPER_BEAR_SHORT'
+        # DISPARADOR 2: LATERAL SCALP (Dominio del Rango)
+        # Entra cuando el precio toca la banda superior en mercado lateral
+        # No requiere ADX alto, requiere agotamiento micro.
+        lateral_short = (
+            (dataframe['master_lateral_switch'] == 1) &
+            (dataframe['close'] >= dataframe['bb_upperband'] * 0.998) &
+            (dataframe['pair_rsi_1m'] > 65) &  # Agotamiento micro en 1m
+            (dataframe['rsi'] > 45)             # No entramos si ya está oversold
+        )
+
+        dataframe.loc[trend_short, 'enter_short'] = 1
+        dataframe.loc[trend_short, 'enter_tag'] = 'SNIPER_TREND_SHORT'
+        
+        dataframe.loc[lateral_short, 'enter_short'] = 1
+        dataframe.loc[lateral_short, 'enter_tag'] = 'SNIPER_LATERAL_SCALP'
+        
         return dataframe
 
     def populate_exit_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:

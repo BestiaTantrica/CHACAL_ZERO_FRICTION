@@ -96,12 +96,9 @@ class ChacalVolumeHunter_V5(IStrategy):
 
     def populate_entry_trend(self, dataframe: DataFrame, metadata: dict) -> DataFrame:
         dynamic_threshold = dataframe['btc_5m_std'] * float(self.btc_threshold_mult.value)
-        time_guard = (dataframe['date'].dt.hour >= 6) & (dataframe['date'].dt.hour < 21)
-
         # Lógica BULL ATRASO V5 (Usando confidence)
         bull_long = (
             dataframe['is_bull_market'] &
-            time_guard &
             (dataframe['atraso_real'] > dynamic_threshold) &
             (dataframe['volume'] > (dataframe['volume_mean'] * 1.3)) &
             (dataframe['risk_pressure_score'] < 0.45)
@@ -110,7 +107,6 @@ class ChacalVolumeHunter_V5(IStrategy):
         # Lógica LATERAL RSI
         lateral_long = (
             (dataframe['bull_confidence'] > 0.3) &
-            time_guard &
             (dataframe['btc_5m_rsi'].between(45, 55)) &
             (dataframe['rsi'] < self.rsi_buy_min.value)
         )

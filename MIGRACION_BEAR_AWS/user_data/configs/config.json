@@ -1,0 +1,64 @@
+{
+    "bot_name": "CHACAL_BEAR_AWS",
+    "db_url": "sqlite:///user_data/bear.sqlite",
+    "initial_state": "running",
+    "trading_mode": "futures",
+    "margin_mode": "isolated",
+    "stake_currency": "USDT",
+    "stake_amount": "unlimited",
+    "tradable_balance_ratio": 0.95,
+    "fiat_display_currency": "USD",
+    "dry_run": true,
+    "max_open_trades": 8,
+    "timeframe": "1m",
+    "stoploss": -0.99,
+    "entry_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "exit_pricing": {
+        "price_side": "same",
+        "use_order_book": true,
+        "order_book_top": 1
+    },
+    "unfilledtimeout": {
+        "entry": 10,
+        "exit": 30
+    },
+    "exchange": {
+        "name": "binance",
+        "ccxt_config": {
+            "options": {
+                "defaultType": "swap"
+            }
+        },
+        "pair_whitelist": [
+            "BTC/USDT:USDT",
+            "ETH/USDT:USDT",
+            "SOL/USDT:USDT",
+            "BNB/USDT:USDT",
+            "XRP/USDT:USDT",
+            "AVAX/USDT:USDT",
+            "LINK/USDT:USDT",
+            "DOGE/USDT:USDT"
+        ]
+    },
+    "pairlists": [
+        {
+            "method": "StaticPairList"
+        }
+    ],
+    "telegram": {
+        "enabled": true,
+        "token": "7998240806:AAECN0ypjqOwFDR6c1SOn6rW2Hlb3OD7wNA",
+        "chat_id": "6527908321"
+    },
+    "api_server": {
+        "enabled": true,
+        "listen_ip_address": "127.0.0.1",
+        "listen_port": 8080,
+        "username": "chacal",
+        "password": "chacalpassword"
+    }
+}

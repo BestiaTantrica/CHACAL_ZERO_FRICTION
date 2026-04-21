@@ -22,11 +22,28 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='repla
 DATA_DIR = r"C:\CHACAL_ZERO_FRICTION\research_data"
 BASE_URL  = "https://api.binance.com/api/v3/klines"
 
+# MEGA-SCAN: Encontrar el TOP 6 definitivo
+# Todos tienen Futuros en Binance, todos son tokens de evento/meme/deporte
 CUARTET = {
-    "OGUSDT":  {"allow_long": False, "label": "Solo Short"},
-    "BARUSDT": {"allow_long": True,  "label": "Dual"},
-    "WIFUSDT": {"allow_long": False, "label": "Solo Short"},
-    "APEUSDT": {"allow_long": True,  "label": "Dual"},
+    # -- Fan Tokens (Deportivos) --
+    "SANTOSUSDT": {"allow_long": True,  "label": "Dual"},
+    "OGUSDT":     {"allow_long": False, "label": "Solo Short"},
+    "LAZIOUSDT":  {"allow_long": True,  "label": "Dual"},
+    "PSGUSDT":    {"allow_long": True,  "label": "Dual"},
+    "ACMUSDT":    {"allow_long": True,  "label": "Dual"},
+    "ALPINEUSDT": {"allow_long": True,  "label": "Dual"},
+    # -- Meme Coins de alta volatilidad --
+    "WIFUSDT":    {"allow_long": False, "label": "Solo Short"},
+    "NOTUSDT":    {"allow_long": True,  "label": "Dual"},
+    "PEPEUSDT":   {"allow_long": False, "label": "Solo Short"},
+    "SHIBUSDT":   {"allow_long": True,  "label": "Dual"},
+    "BONKUSDT":   {"allow_long": True,  "label": "Dual"},
+    "FLOKIUSDT":  {"allow_long": True,  "label": "Dual"},
+    # -- Gaming / NFT Event-Driven --
+    "IMXUSDT":    {"allow_long": True,  "label": "Dual"},
+    "GALAUSDT":   {"allow_long": True,  "label": "Dual"},
+    "YGGUSDT":    {"allow_long": True,  "label": "Dual"},
+    "PIXELUSDT":  {"allow_long": True,  "label": "Dual"},
 }
 
 DIAS = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"]

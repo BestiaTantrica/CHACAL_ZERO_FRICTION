@@ -11,10 +11,9 @@ EMA_PERIOD = 50
 TIMEFRAME = '1h'
 BTC_SYMB = 'BTC/USDT:USDT'
 
-# CONFIGURACIÓN TELEGRAM (Sincronizada con el bot)
-# Estos campos se llenarán con los datos de tu config.json en AWS
-TELEGRAM_TOKEN = "" # Se rellena en AWS
-TELEGRAM_CHAT_ID = "" 
+# CONFIGURACIÓN TELEGRAM (Sincronizada con el bot verificado de AWS FICT)
+TELEGRAM_TOKEN = "8760247299:AAHNhw7k-YlEG2kL7lO0Ze5cbuRzg7y8bW4" 
+TELEGRAM_CHAT_ID = "6527908321" 
 
 class ChacalTrifasicoControl:
     def __init__(self, btc_data_path):

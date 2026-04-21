@@ -7,22 +7,36 @@ import os
 import json
 
 # ================================================================
-# 🦅 CHACAL ORCHESTRATOR V4.0 - THE SNIPER KING EDITION
+# 🦅 CHACAL ORCHESTRATOR V4.0 - THE SNIPER KING EDITION (FICT TRIFÁSICO)
 # ================================================================
 
-LATERAL_THRESHOLD = 0.043  # 4.3% (Optimizado para +527% ROI)
+LATERAL_ZONE = 0.02         # ±2% para Lateral V4
+TREND_THRESHOLD = 0.043     # 4.3% para Especialistas
 EMA_PERIOD = 50
 CHECK_INTERVAL = 60        # Chequeo cada minuto
 
 def get_telegram_config():
-    """Busca el token y chat_id en el config.json de Freqtrade"""
-    try:
-        with open('/home/ubuntu/freqtrade/user_data/configs/config.json') as f:
-            cfg = json.load(f)
-            return cfg['telegram']['token'], cfg['telegram']['chat_id']
-    except Exception as e:
-        print(f"Error cargando Telegram Config: {e}")
-        return None, None
+    """Busca el token y chat_id en múltiples rutas posibles para robustez total"""
+    possible_paths = [
+        '/home/ubuntu/freqtrade/user_data/configs/config.json',
+        '/home/ubuntu/chacal/scripts/config_aws.json',
+        'scripts/config_aws.json',
+        'config_v5_oracle.json',
+        'user_data/configs/config.json'
+    ]
+    
+    for path in possible_paths:
+        try:
+            if os.path.exists(path):
+                with open(path) as f:
+                    cfg = json.load(f)
+                    if 'telegram' in cfg:
+                        return cfg['telegram']['token'], cfg['telegram']['chat_id']
+        except:
+            continue
+            
+    # Fallback al token verificado hoy para AWS (Volume Pairs Bot)
+    return "8760247299:AAHNhw7k-YlEG2kL7lO0Ze5cbuRzg7y8bW4", "6527908321"
 
 def send_telegram(token, chat_id, message):
     if not token or not chat_id: return
@@ -68,8 +82,9 @@ def main():
     token, chat_id = get_telegram_config()
     last_regime = None
     
-    msg_init = "--- INICIANDO CEREBRO SNIPER KING V4.0 (Logic Feedback Mode) ---"
+    msg_init = "--- 🦅 CORE SNIPER RELOADED: CONFIGURACIÓN SIN BOZALES ACTIVADA ---"
     print(msg_init)
+    send_telegram(token, chat_id, "🦅 [SISTEMA]: Cerebro Cuántico reiniciado. Bozales eliminados. Esperando entrada en mercado...")
     
     while True:
         df = get_btc_data()
@@ -79,22 +94,18 @@ def main():
             last_ema = df['ema50'].iloc[-1]
             diff_pct = (last_price / last_ema) - 1
             
-            # 1. REFERENCIA BASE CLÁSICA (Indicadores Reales)
-            if diff_pct < LATERAL_THRESHOLD:
-                base_regime = "ELITE_SNIPER_BEAR"
+            # 1. REFERENCIA BASE CLÁSICA (Régimen Trifásico FICT)
+            if abs(diff_pct) <= LATERAL_ZONE:
+                base_regime = "LATERAL_V4"
+            elif diff_pct < TREND_THRESHOLD:
+                base_regime = "ELITE_SNIPER_BEAR"  # Cubre el umbral hasta 4.3%
             else:
-                base_regime = "ELITE_VOLUME_HUNTER"
+                base_regime = "ELITE_VOLUME_HUNTER" # Super-Bull
             
-            # 2. FEEDBACK ACTIVO (Intercalar si falla)
-            # La orden es clara: "si una falla entra la otra"
-            last_failed = check_recent_failure()
-            
-            if last_failed:
-                regime = "ELITE_VOLUME_HUNTER" if base_regime == "ELITE_SNIPER_BEAR" else "ELITE_SNIPER_BEAR"
-                status_note = " (INTERCALADO POR FALLO RECIENTE)"
-            else:
-                regime = base_regime
-                status_note = ""
+            # 2. SEGUERIDAD: EL PRECIO MANDA (Regla de Oro)
+            # Eliminamos el intercalado por fallo para evitar bloqueos artificiales.
+            regime = base_regime
+            status_note = ""
             
             print(f"[{time.strftime('%H:%M:%S')}] BTC: ${last_price} | Diff: {round(diff_pct*100, 2)}% | Régimen: {regime}{status_note}", flush=True)
 
@@ -103,14 +114,18 @@ def main():
                 print(change_msg, flush=True)
                 send_telegram(token, chat_id, change_msg)
 
-                if regime == "ELITE_SNIPER_BEAR":
-                    subprocess.run(["sudo", "systemctl", "stop", "ft-bull"], check=False)
+                if regime == "LATERAL_V4":
+                    subprocess.run(["sudo", "systemctl", "stop", "ft-bear", "ft-bull"], check=False)
+                    subprocess.run(["sudo", "systemctl", "start", "ft-lateral"], check=False)
+                    send_telegram(token, chat_id, "🔮 MODO LATERAL V4 ACTIVADO (Termómetro 24/7)")
+                elif regime == "ELITE_SNIPER_BEAR":
+                    subprocess.run(["sudo", "systemctl", "stop", "ft-lateral", "ft-bull"], check=False)
                     subprocess.run(["sudo", "systemctl", "start", "ft-bear"], check=False)
-                    send_telegram(token, chat_id, "🦅 SNIPER BEAR ACTIVADO (Especialista 7x)")
+                    send_telegram(token, chat_id, "🦅 SNIPER BEAR ACTIVADO (Especialista Bear/Lateral 7x)")
                 else:
-                    subprocess.run(["sudo", "systemctl", "stop", "ft-bear"], check=False)
+                    subprocess.run(["sudo", "systemctl", "stop", "ft-lateral", "ft-bear"], check=False)
                     subprocess.run(["sudo", "systemctl", "start", "ft-bull"], check=False)
-                    send_telegram(token, chat_id, "🦊 VOLUME HUNTER ACTIVADO (Especialista 10x)")
+                    send_telegram(token, chat_id, "🦊 VOLUME HUNTER ACTIVADO (Especialista Bull 10x)")
                 
                 last_regime = regime
         
