@@ -10,7 +10,8 @@
     "fiat_display_currency": "USD",
     "dry_run": true,
     "max_open_trades": 8,
-    "timeframe": "1m",
+    "timeframe": "5m",
+    "strategy": "ChacalVolumeHunter_V1",
     "cancel_open_orders_on_exit": false,
     "exchange": {
         "name": "binance",
@@ -23,11 +24,11 @@
             "BTC/USDT:USDT",
             "ETH/USDT:USDT",
             "SOL/USDT:USDT",
-            "BNB/USDT:USDT",
-            "XRP/USDT:USDT",
+            "NEAR/USDT:USDT",
+            "DOGE/USDT:USDT",
+            "PEPE/USDT:USDT",
             "AVAX/USDT:USDT",
-            "LINK/USDT:USDT",
-            "DOGE/USDT:USDT"
+            "BNB/USDT:USDT"
         ]
     },
     "pairlists": [
@@ -59,4 +60,3 @@
         "jwt_secret_key": "some-secret-key-change-me"
     }
 }
-
